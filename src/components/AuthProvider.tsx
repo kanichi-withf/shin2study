@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } catch (err) {
       console.error('Firebase init failed', err);
-      setLoading(false);
+      queueMicrotask(() => setLoading(false));
     }
     return () => {
       try {

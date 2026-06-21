@@ -705,11 +705,13 @@
   box-shadow: 0 1px 0 var(--border-color);
 }
 
+/* No CSS animation on the button itself — iOS Safari can drop taps on an
+   actively-animating element. The scale(1.05) + base transition (0.1s) gives
+   enough visual feedback on its own. */
 .quiz-difficulty-btn--active {
   background: var(--accent-yellow) !important;
   transform: scale(1.05);
   box-shadow: 0 4px 0 var(--border-color);
-  animation: wiggle 0.5s ease-in-out 1;
 }
 
 @media (max-width: 480px) {

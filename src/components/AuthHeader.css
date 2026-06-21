@@ -30,9 +30,11 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.auth-header__signin:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 var(--border-color);
+@media (hover: hover) {
+  .auth-header__signin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--border-color);
+  }
 }
 
 .auth-header__signin:active {
@@ -78,9 +80,11 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.auth-header__avatar-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 var(--border-color);
+@media (hover: hover) {
+  .auth-header__avatar-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--border-color);
+  }
 }
 
 .auth-header__avatar-btn:active {
@@ -143,8 +147,10 @@
   width: 100%;
 }
 
-.auth-header__menu-item:hover {
-  background: var(--bg-secondary);
+@media (hover: hover) {
+  .auth-header__menu-item:hover {
+    background: var(--bg-secondary);
+  }
 }
 
 .auth-header__menu-item--signout {
