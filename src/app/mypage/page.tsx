@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
-import type { AttemptRecord, QuizStats } from '@/lib/quiz-store';
+import type { AttemptRecord, QuizId, QuizStats } from '@/lib/quiz-store';
 import './mypage.css';
 
 interface MistakeEntry {
@@ -14,6 +14,11 @@ interface MistakeEntry {
   total: number;
   wrongRate: number;
 }
+
+const QUIZZES: Array<{ id: QuizId; emoji: string; title: string; href: string }> = [
+  { id: 'japan-map', emoji: '🗾', title: 'にほんちず クイズ', href: '/quiz/japan-map' },
+  { id: 'japan-shape', emoji: '🧩', title: 'けんのかたち クイズ', href: '/quiz/japan-shape' },
+];
 
 function buildMistakeRanking(stats: QuizStats | null): MistakeEntry[] {
   if (!stats) return [];
@@ -51,9 +56,20 @@ function formatDate(ts: AttemptRecord['createdAt']): string {
   ).padStart(2, '0')}`;
 }
 
+function quizLabel(id: QuizId): string {
+  switch (id) {
+    case 'japan-map':
+      return '🗾 にほんちず';
+    case 'japan-shape':
+      return '🧩 けんのかたち';
+    default:
+      return id;
+  }
+}
+
 export default function MyPage() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
-  const [stats, setStats] = useState<QuizStats | null>(null);
+  const [statsByQuiz, setStatsByQuiz] = useState<Record<string, QuizStats | null>>({});
   const [attempts, setAttempts] = useState<AttemptRecord[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -63,14 +79,22 @@ export default function MyPage() {
     import('@/lib/quiz-store')
       .then(({ getQuizStats, listRecentAttempts }) =>
         Promise.all([
-          getQuizStats(user.uid, 'japan-map'),
+          ...QUIZZES.map((q) =>
+            getQuizStats(user.uid, q.id).then((s) => [q.id, s] as const),
+          ),
           listRecentAttempts(user.uid, 10),
         ]),
       )
-      .then(([s, a]) => {
+      .then((results) => {
         if (cancelled) return;
-        setStats(s);
-        setAttempts(a);
+        const statsResults = results.slice(0, QUIZZES.length) as Array<
+          readonly [QuizId, QuizStats | null]
+        >;
+        const recent = results[QUIZZES.length] as AttemptRecord[];
+        const map: Record<string, QuizStats | null> = {};
+        for (const [id, s] of statsResults) map[id] = s;
+        setStatsByQuiz(map);
+        setAttempts(recent);
       })
       .catch((err) => {
         console.error(err);
@@ -113,8 +137,6 @@ export default function MyPage() {
     );
   }
 
-  const ranking = buildMistakeRanking(stats);
-
   return (
     <main className="mypage">
       <Link href="/" className="mypage__back">← ホームへ</Link>
@@ -130,53 +152,65 @@ export default function MyPage() {
         <p className="mypage__loading">きろくを よみこんでいます…</p>
       )}
 
-      <section className="mypage__section">
-        <h2 className="mypage__section-title">🗾 にほんちず クイズ</h2>
-        {stats && stats.totalAttempts > 0 ? (
-          <div className="mypage__stats-grid">
-            <div className="mypage__stat-card">
-              <div className="mypage__stat-label">ちょうせんかいすう</div>
-              <div className="mypage__stat-value">{stats.totalAttempts} かい</div>
-            </div>
-            <div className="mypage__stat-card mypage__stat-card--best">
-              <div className="mypage__stat-label">ベストスコア</div>
-              <div className="mypage__stat-value">
-                {stats.bestScore} / {stats.bestTotal}
-              </div>
-            </div>
-            <div className="mypage__stat-card">
-              <div className="mypage__stat-label">さいきんのスコア</div>
-              <div className="mypage__stat-value">
-                {stats.lastScore} / {stats.lastTotal}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <p className="mypage__empty">
-            まだ きろくが ないよ。さいしょの ちょうせんを はじめよう！
-          </p>
-        )}
-      </section>
+      {QUIZZES.map((quiz) => {
+        const stats = statsByQuiz[quiz.id] ?? null;
+        const ranking = buildMistakeRanking(stats);
+        return (
+          <div key={quiz.id}>
+            <section className="mypage__section">
+              <h2 className="mypage__section-title">
+                {quiz.emoji} {quiz.title}
+              </h2>
+              {stats && stats.totalAttempts > 0 ? (
+                <div className="mypage__stats-grid">
+                  <div className="mypage__stat-card">
+                    <div className="mypage__stat-label">ちょうせんかいすう</div>
+                    <div className="mypage__stat-value">{stats.totalAttempts} かい</div>
+                  </div>
+                  <div className="mypage__stat-card mypage__stat-card--best">
+                    <div className="mypage__stat-label">ベストスコア</div>
+                    <div className="mypage__stat-value">
+                      {stats.bestScore} / {stats.bestTotal}
+                    </div>
+                  </div>
+                  <div className="mypage__stat-card">
+                    <div className="mypage__stat-label">さいきんのスコア</div>
+                    <div className="mypage__stat-value">
+                      {stats.lastScore} / {stats.lastTotal}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="mypage__empty">
+                  まだ きろくが ないよ。<Link href={quiz.href}>はじめて みよう！</Link>
+                </p>
+              )}
+            </section>
 
-      {ranking.length > 0 && (
-        <section className="mypage__section">
-          <h2 className="mypage__section-title">😢 よく まちがえる けん</h2>
-          <ol className="mypage__ranking">
-            {ranking.map((item, idx) => (
-              <li key={item.code} className="mypage__ranking-item">
-                <span className="mypage__ranking-rank">{idx + 1}</span>
-                <span className="mypage__ranking-name">{item.name}</span>
-                <span className="mypage__ranking-meta">
-                  まちがい {item.wrong} / {item.total} かい
-                  <span className="mypage__ranking-rate">
-                    ({Math.round(item.wrongRate * 100)}%)
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
+            {ranking.length > 0 && (
+              <section className="mypage__section">
+                <h2 className="mypage__section-title">
+                  😢 よく まちがえる けん ({quiz.emoji})
+                </h2>
+                <ol className="mypage__ranking">
+                  {ranking.map((item, idx) => (
+                    <li key={item.code} className="mypage__ranking-item">
+                      <span className="mypage__ranking-rank">{idx + 1}</span>
+                      <span className="mypage__ranking-name">{item.name}</span>
+                      <span className="mypage__ranking-meta">
+                        まちがい {item.wrong} / {item.total} かい
+                        <span className="mypage__ranking-rate">
+                          ({Math.round(item.wrongRate * 100)}%)
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+          </div>
+        );
+      })}
 
       <section className="mypage__section">
         <h2 className="mypage__section-title">🕒 さいきんの ちょうせん</h2>
@@ -186,6 +220,9 @@ export default function MyPage() {
               <li key={a.id} className="mypage__attempt">
                 <span className="mypage__attempt-date">
                   {formatDate(a.createdAt)}
+                </span>
+                <span className="mypage__attempt-quiz">
+                  {quizLabel(a.quizId)}
                 </span>
                 <span className="mypage__attempt-score">
                   {a.score} / {a.total}
@@ -202,8 +239,8 @@ export default function MyPage() {
       </section>
 
       <div className="mypage__cta">
-        <Link href="/quiz/japan-map" className="mypage__cta-btn">
-          🚀 クイズに ちょうせん！
+        <Link href="/" className="mypage__cta-btn">
+          🚀 クイズを えらぶ
         </Link>
       </div>
     </main>

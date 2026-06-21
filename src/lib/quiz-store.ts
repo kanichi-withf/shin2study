@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { getDb } from '@/lib/firebase';
 
-export type QuizId = 'japan-map';
+export type QuizId = 'japan-map' | 'japan-shape';
 
 export interface AttemptQuestion {
   code: string;

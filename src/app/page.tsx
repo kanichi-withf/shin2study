@@ -13,6 +13,16 @@ const quizzes = [
     available: true,
   },
   {
+    id: 'japan-shape',
+    title: 'けんのかたち',
+    subtitle: '都道府県の形クイズ',
+    emoji: '🧩',
+    description: 'かたちだけで けんを あてよう！',
+    href: '/quiz/japan-shape',
+    gradient: 'linear-gradient(135deg, #6BCB77, #4D96FF)',
+    available: true,
+  },
+  {
     id: 'world-map',
     title: 'せかいちず',
     subtitle: '世界地図クイズ',
