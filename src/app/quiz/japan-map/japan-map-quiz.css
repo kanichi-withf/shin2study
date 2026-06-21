@@ -104,6 +104,11 @@
   font-size: 1.5rem;
 }
 
+.quiz-start__btn-wrapper {
+  display: inline-block;
+  animation: float 2s ease-in-out infinite;
+}
+
 .quiz-start__btn {
   display: inline-flex;
   align-items: center;
@@ -123,13 +128,11 @@
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   min-height: 76px;
-  animation: float 2s ease-in-out infinite;
 }
 
 .quiz-start__btn:active {
   transform: translateY(6px);
   box-shadow: var(--shadow-toy-active);
-  animation: none;
   transition: none !important;
 }
 

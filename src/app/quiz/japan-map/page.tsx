@@ -63,46 +63,22 @@ export default function JapanMapQuizPage() {
   const [timerKey, setTimerKey] = useState(0);
   const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const startNextQuestion = useCallback((prevState: QuizState) => {
-    const available = PREFECTURES.filter(p => !prevState.usedCodes.includes(p.code));
-    if (available.length === 0 || prevState.currentQuestion >= TOTAL_QUESTIONS) {
-      setState(prev => ({ ...prev, phase: 'result' }));
-      return;
-    }
-
-    const randomPref = available[Math.floor(Math.random() * available.length)];
+  const startGame = useCallback(() => {
+    const randomPref = PREFECTURES[Math.floor(Math.random() * PREFECTURES.length)];
     const choices = generateChoices(randomPref, PREFECTURES);
 
-    setState(prev => ({
-      ...prev,
+    setState({
+      currentQuestion: 1,
+      score: 0,
       currentPrefecture: randomPref,
       choices,
       phase: 'playing',
       selectedAnswer: null,
-    }));
+      answeredCodes: [],
+      usedCodes: [randomPref.code],
+    });
     setTimerKey(prev => prev + 1);
   }, []);
-
-  const startGame = useCallback(() => {
-    const initialState: QuizState = {
-      currentQuestion: 0,
-      score: 0,
-      currentPrefecture: null,
-      choices: [],
-      phase: 'ready',
-      selectedAnswer: null,
-      answeredCodes: [],
-      usedCodes: [],
-    };
-    startNextQuestion(initialState);
-    setState(prev => ({
-      ...prev,
-      currentQuestion: 1,
-      score: 0,
-      answeredCodes: [],
-      usedCodes: [],
-    }));
-  }, [startNextQuestion]);
 
   const handleAnswer = useCallback((answer: string, isCorrect: boolean) => {
     if (state.phase !== 'playing') return;
@@ -220,13 +196,16 @@ export default function JapanMapQuizPage() {
                 <span>{timeLimit}びょう</span>
               </div>
             </div>
-            <button
-              className="quiz-start__btn"
-              onClick={startGame}
-              id="start-quiz-btn"
-            >
-              🚀 スタート！
-            </button>
+            <div className="quiz-start__btn-wrapper">
+              <button
+                type="button"
+                className="quiz-start__btn"
+                onClick={startGame}
+                id="start-quiz-btn"
+              >
+                🚀 スタート！
+              </button>
+            </div>
           </div>
         </div>
       </main>
