@@ -383,8 +383,8 @@
 .quiz-section--answer {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: 18px;
+  gap: 8px;
+  padding: 14px 14px 12px;
   background:
     radial-gradient(circle at 90% 0%, rgba(165, 94, 234, 0.14), transparent 55%),
     radial-gradient(circle at 0% 100%, rgba(77, 150, 255, 0.12), transparent 60%),
@@ -455,7 +455,7 @@
   /* Reserve a definite area for the map. Without this, in the
      min-height layout (no parent flex:1) the container collapsed to 0
      while the SVG was loading, and on some browsers stayed 0. */
-  min-height: 380px;
+  min-height: 520px;
 }
 
 /* --- Choices container --- */
