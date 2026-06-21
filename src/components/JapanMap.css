@@ -1,6 +1,7 @@
 .japan-map-container {
   width: 100%;
   max-width: 500px;
+  min-height: 240px;
   margin: 0 auto;
   position: relative;
   display: flex;
@@ -29,7 +30,11 @@
 .japan-map-svg {
   width: 100%;
   height: auto;
-  max-height: 45vh; /* Default constraint for portrait mode */
+  /* Explicit min-height keeps the SVG visible on older Safari that ignores
+     the intrinsic aspect ratio from a viewBox-only SVG (no width/height
+     attributes). */
+  min-height: 220px;
+  max-height: 45vh;
   display: block;
 }
 
