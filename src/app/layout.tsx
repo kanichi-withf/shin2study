@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/AuthProvider";
 import AuthHeader from "@/components/AuthHeader";
+import IOSTouchFix from "@/components/IOSTouchFix";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,15 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head>
-        {/* Enable pseudo-class :active instantly on iOS/iPadOS Safari */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.addEventListener("touchstart", function(){}, {passive: true});`,
-          }}
-        />
-      </head>
+      <head />
       <body>
+        <IOSTouchFix />
         <AuthProvider>
           <AuthHeader />
           {children}
