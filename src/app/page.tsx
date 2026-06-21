@@ -13,6 +13,16 @@ const quizzes = [
     available: true,
   },
   {
+    id: 'world-map',
+    title: 'せかいちず',
+    subtitle: '世界地図クイズ',
+    emoji: '🌎',
+    description: 'せかいのくにをあてよう！',
+    href: '/quiz/world-map',
+    gradient: 'linear-gradient(135deg, #8E2DE2, #4A00E0)',
+    available: false,
+  },
+  {
     id: 'animals',
     title: 'どうぶつ',
     subtitle: '動物クイズ',

@@ -79,7 +79,7 @@ export default function QuizResult({ score, total, onRetry }: QuizResultProps) {
             🔄 もういっかい
           </button>
           <Link href="/" className="quiz-result__btn quiz-result__btn--home">
-            🏠 トップへ
+            🏠 もどる
           </Link>
         </div>
       </div>

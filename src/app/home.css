@@ -30,8 +30,10 @@
 
 .home__logo-emoji {
   font-size: 3.8rem;
-  animation: wiggle 2.5s ease-in-out infinite;
   display: inline-block;
+  /* Single playful entry animation instead of an infinite wiggle that keeps
+     the main thread busy even when nothing is happening. */
+  animation: wiggle 2.5s ease-in-out 0s 1;
 }
 
 .home__title {
@@ -40,19 +42,19 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  filter: drop-shadow(0 4px 0 rgba(92, 77, 74, 0.15));
+  /* drop-shadow filter removed — replaced with a flat text-shadow which the
+     browser can rasterize once instead of compositing every frame. */
+  text-shadow: 0 4px 0 rgba(92, 77, 74, 0.15);
 }
 
 .home__title-shin {
   font-family: var(--font-japanese);
   color: var(--accent-primary);
-  animation: kids-bounce 2s ease-in-out infinite;
 }
 
 .home__title-study {
   font-family: var(--font-japanese);
   color: var(--accent-blue);
-  animation: kids-bounce 2s ease-in-out infinite 0.2s;
 }
 
 .home__subtitle {
@@ -116,9 +118,16 @@
 }
 
 .home__card--active:active {
-  transform: translateY(4px);
-  box-shadow: var(--shadow-toy-active);
-  transition: none !important;
+  opacity: 0.8;
+}
+
+@media (hover: hover) {
+  .home__card--active:active {
+    transform: translateY(4px);
+    box-shadow: var(--shadow-toy-active);
+    transition: none !important;
+    opacity: 1;
+  }
 }
 
 .home__card--locked {

@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { AuthProvider } from "@/components/AuthProvider";
+import AuthHeader from "@/components/AuthHeader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,7 +28,10 @@ export default function RootLayout({
     <html lang="ja">
       <head />
       <body>
-        {children}
+        <AuthProvider>
+          <AuthHeader />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -45,46 +45,25 @@
 
 .time-bar__fill--red {
   background: linear-gradient(90deg, #FF4D4D, #FF8E8E);
-  animation: pulse-red 0.5s ease-in-out infinite;
 }
 
-/* Cute running character at the end of the bar */
+/* Cute running character at the end of the bar
+   (constant rotate/scale animation removed — it triggered transform on every
+   frame for the entire question. Static emoji is plenty for the visual.) */
 .time-bar__runner {
   position: absolute;
   right: -16px;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) rotate(-6deg);
   font-size: 2.2rem;
   line-height: 1;
   pointer-events: none;
   z-index: 10;
   display: inline-block;
-  animation: runner-wiggle 0.4s linear infinite;
-  filter: drop-shadow(0 2px 4px rgba(92, 77, 74, 0.15));
 }
 
 .time-bar__icon {
   font-size: 2.2rem;
   min-width: 36px;
   text-align: center;
-  animation: bounce-icon 1s ease infinite;
-}
-
-@keyframes pulse-red {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
-}
-
-@keyframes runner-wiggle {
-  0%, 100% {
-    transform: translateY(-50%) rotate(-6deg) scale(1);
-  }
-  50% {
-    transform: translateY(-60%) rotate(6deg) scale(1.08);
-  }
-}
-
-@keyframes bounce-icon {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
 }

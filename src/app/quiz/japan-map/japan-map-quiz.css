@@ -39,9 +39,16 @@
 }
 
 .quiz-back-btn:active {
-  transform: scale(0.98);
-  box-shadow: 0 2px 0 var(--border-color);
-  transition: none !important;
+  opacity: 0.8;
+}
+
+@media (hover: hover) {
+  .quiz-back-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 0 var(--border-color);
+    transition: none !important;
+    opacity: 1;
+  }
 }
 
 .quiz-start__card {
@@ -128,9 +135,16 @@
 }
 
 .quiz-start__btn:active {
-  transform: scale(0.98);
-  box-shadow: 0 4px 0 var(--border-color);
-  transition: none !important;
+  opacity: 0.8;
+}
+
+@media (hover: hover) {
+  .quiz-start__btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 0 var(--border-color);
+    transition: none !important;
+    opacity: 1;
+  }
 }
 
 /* --- Quiz Layout --- */
@@ -139,8 +153,8 @@
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
-  padding: 16px;
-  gap: 12px;
+  padding: 14px 16px 16px;
+  gap: 22px; /* extra space for section badges that hang above each card */
   overflow: hidden;
 }
 
@@ -171,9 +185,16 @@
 }
 
 .quiz-back-btn-small:active {
-  transform: scale(0.98);
-  box-shadow: 0 2px 0 var(--border-color);
-  transition: none !important;
+  opacity: 0.8;
+}
+
+@media (hover: hover) {
+  .quiz-back-btn-small:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 0 var(--border-color);
+    transition: none !important;
+    opacity: 1;
+  }
 }
 
 .quiz-progress {
@@ -218,22 +239,86 @@
   box-shadow: 0 4px 0 var(--border-color);
 }
 
-/* --- Timer --- */
+/* --- Section cards (もんだい / こたえ) --- */
+.quiz-section {
+  position: relative;
+  border: var(--border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: 0 5px 0 var(--border-color);
+  padding: 20px 14px 14px;
+}
+
+.quiz-section--question {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 217, 61, 0.18), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(255, 159, 67, 0.12), transparent 60%),
+    linear-gradient(180deg, #FFFBEA 0%, #FFFDF7 70%);
+}
+
+.quiz-section--answer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 18px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(165, 94, 234, 0.14), transparent 55%),
+    radial-gradient(circle at 0% 100%, rgba(77, 150, 255, 0.12), transparent 60%),
+    linear-gradient(180deg, #F4F0FF 0%, #FFFDF7 75%);
+}
+
+/* Section badges */
+.quiz-section__badge {
+  position: absolute;
+  top: -14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 16px;
+  border: var(--border-medium);
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 900;
+  font-family: var(--font-japanese);
+  color: white;
+  box-shadow: 0 3px 0 var(--border-color);
+  letter-spacing: 0.06em;
+  z-index: 2;
+  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quiz-section__badge--question {
+  left: 16px;
+  background: linear-gradient(135deg, #FF9F43, #FFD93D);
+  color: #5C4D4A;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.quiz-section__badge--answer {
+  right: 16px;
+  background: linear-gradient(135deg, #A55EEA, #C896FF);
+  text-shadow: 0 2px 4px rgba(92, 77, 74, 0.25);
+}
+
+.quiz-section__badge-icon {
+  font-size: 1.15rem;
+}
+
+/* --- Timer (inside question section) --- */
 .quiz-timer {
   padding: 0;
-  margin: 0 -16px; /* 画面よこはばいっぱいに広げる（.quiz-layoutのpadding分を相殺） */
   flex-shrink: 0;
 }
 
-/* --- Question --- */
-.quiz-question {
-  text-align: center;
-  padding: 4px 0;
-  margin: 0 -16px; /* 画面よこはばいっぱいに広げる（.quiz-layoutのpadding分を相殺） */
-  flex-shrink: 0;
-}
-
+/* --- Question prompt --- */
 .quiz-question__text {
+  margin: 4px 0 2px;
+  text-align: center;
   font-size: 1.6rem;
   font-weight: 900;
   font-family: var(--font-japanese);
@@ -241,79 +326,302 @@
   animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* --- Map --- */
+/* --- Map (inside question section) --- */
 .quiz-map {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 4px;
   min-height: 0; /* Important for flex child sizing */
 }
 
-/* --- Choices --- */
-.quiz-choices {
-  padding: 8px 4px 20px;
-  flex-shrink: 0;
+/* --- Choices container --- */
+.quiz-choices-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* --- Result Modal ---
+   backdrop-filter removed — it forced full-screen blur compositing on every
+   frame, which is the single most expensive effect on mobile/iPad. A solid
+   semi-opaque overlay gives the same dimming effect for free. */
+.quiz-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(46, 33, 30, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.quiz-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--card-bg);
+  border: var(--border-thick);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-toy);
+  padding: 32px 28px;
+  text-align: center;
+  animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quiz-modal--correct {
+  background: linear-gradient(180deg, #FFFBEA 0%, #FFFDF7 60%);
+}
+
+.quiz-modal--wrong {
+  background: linear-gradient(180deg, #FFF0F0 0%, #FFFDF7 60%);
+}
+
+.quiz-modal__icon {
+  font-size: 4.5rem;
+  line-height: 1;
+  margin-bottom: 12px;
+  animation: icon-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.quiz-modal__title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  font-family: var(--font-japanese);
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  text-shadow: 0 2px 0 rgba(92, 77, 74, 0.1);
+}
+
+.quiz-modal--correct .quiz-modal__title {
+  color: #2BA853;
+}
+
+.quiz-modal--wrong .quiz-modal__title {
+  color: #E84545;
+}
+
+.quiz-modal__answer {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-family: var(--font-japanese);
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.quiz-modal__answer-name {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.quiz-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 24px;
+  border: var(--border-thick);
+  border-radius: var(--radius-md);
+  font-size: 1.4rem;
+  font-weight: 900;
+  font-family: var(--font-japanese);
+  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-pink));
+  cursor: pointer;
+  box-shadow: var(--shadow-toy);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 64px;
+  /* No infinite pulse — the button already pops in via scaleIn on the modal. */
+}
+
+.quiz-modal__btn:active {
+  opacity: 0.85;
+}
+
+@media (hover: hover) {
+  .quiz-modal__btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 0 var(--border-color);
+    transition: none !important;
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-next {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@media (max-width: 480px) {
+  .quiz-modal {
+    padding: 24px 20px;
+  }
+
+  .quiz-modal__icon {
+    font-size: 3.6rem;
+    margin-bottom: 8px;
+  }
+
+  .quiz-modal__title {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+  }
+
+  .quiz-modal__answer {
+    font-size: 1rem;
+    margin-bottom: 18px;
+  }
+
+  .quiz-modal__answer-name {
+    font-size: 1.25rem;
+  }
+
+  .quiz-modal__btn {
+    font-size: 1.2rem;
+    min-height: 56px;
+    padding: 14px 18px;
+  }
 }
 
 /* --- Responsive (iPad landscape) ---
-   Use a 2-column Grid layout to maximize map size on landscape */
+   Use a 2-column Grid layout: question card on left, answer card on right */
 @media (min-width: 769px) and (orientation: landscape) {
   .quiz-layout {
     display: grid;
     grid-template-columns: 1.4fr 1fr;
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-rows: auto 1fr;
     height: 100vh;
     height: 100dvh;
     padding: 16px 24px;
-    gap: 12px;
+    gap: 18px;
     overflow: hidden;
   }
 
   .quiz-header {
     grid-column: 1 / span 2;
     grid-row: 1;
-    margin-bottom: 4px;
+    margin-bottom: 0;
   }
 
-  .quiz-timer {
-    grid-column: 1 / span 2;
+  .quiz-section--question {
+    grid-column: 1;
     grid-row: 2;
-    /* 画面よこはばいっぱい（landscapeのpadding 24px分を相殺） */
-    margin: 0 -24px 4px;
+    min-height: 0;
+    padding: 22px 16px 16px;
   }
 
-  .quiz-question {
-    grid-column: 1 / span 2;
-    grid-row: 3;
-    text-align: center;
-    padding: 4px 0;
-    /* 画面よこはばいっぱい（landscapeのpadding 24px分を相殺） */
-    margin: 0 -24px;
+  .quiz-section--answer {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: stretch;
+    justify-content: center;
+    padding: 26px 18px 22px;
   }
 
   .quiz-question__text {
     font-size: 1.8rem;
   }
 
-  .quiz-map {
-    grid-column: 1;
-    grid-row: 4;
-    height: 100%;
-    min-height: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* --- Start Screen Landscape --- */
+  .quiz-start__card {
+    max-width: 820px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    grid-template-rows: auto auto auto auto;
+    gap: 16px 40px;
+    padding: 48px;
+    text-align: left;
   }
 
-  .quiz-choices {
+  .quiz-start__emoji {
+    grid-column: 1;
+    grid-row: 1;
+    text-align: left;
+    margin-bottom: 0;
+  }
+
+  .quiz-start__title {
+    grid-column: 1;
+    grid-row: 2;
+    text-align: left;
+    margin-bottom: 0;
+  }
+
+  .quiz-start__desc {
+    grid-column: 1;
+    grid-row: 3;
+    text-align: left;
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+
+  .quiz-start__btn-wrapper {
+    grid-column: 1;
+    grid-row: 4;
+    text-align: left;
+    margin-bottom: 0;
+  }
+
+  .quiz-start__btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 20px 24px; /* Reduced horizontal padding to prevent wrapping "🚀 スタート！" */
+    white-space: nowrap;
+  }
+
+  .quiz-start__selectors {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: center;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .quiz-start__difficulty-label {
+    text-align: left;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .quiz-start__difficulty-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .quiz-difficulty-btn {
+    min-width: 0;
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1.15rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .quiz-start__info {
     grid-column: 2;
     grid-row: 4;
     align-self: center;
-    padding: 0;
-    width: 100%;
+    margin-bottom: 0;
+    margin-top: 16px;
+    gap: 16px;
   }
 }
 
@@ -337,9 +645,17 @@
   }
 }
 
-/* --- Difficulty Selector --- */
-.quiz-start__difficulty {
+/* --- Selector Containers --- */
+.quiz-start__selectors {
   margin-bottom: 32px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.quiz-start__difficulty,
+.quiz-start__mode {
   width: 100%;
 }
 
@@ -350,13 +666,19 @@
   margin-bottom: 12px;
 }
 
-.quiz-start__difficulty-buttons {
+.quiz-start__difficulty-buttons,
+.quiz-start__mode-buttons {
   display: flex;
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
   max-width: 100%;
   margin: 0 auto;
+}
+
+.quiz-start__mode-buttons .quiz-difficulty-btn {
+  flex: 1;
+  min-width: 140px;
 }
 
 .quiz-difficulty-btn {
@@ -373,26 +695,32 @@
   cursor: pointer;
   box-shadow: 0 4px 0 var(--border-color);
   transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
 .quiz-difficulty-btn:active {
-  transform: scale(0.98);
-  box-shadow: 0 2px 0 var(--border-color);
-  transition: none !important;
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--border-color);
 }
 
 .quiz-difficulty-btn--active {
   background: var(--accent-yellow) !important;
+  transform: scale(1.05);
   box-shadow: 0 4px 0 var(--border-color);
+  animation: wiggle 0.5s ease-in-out 1;
 }
 
 @media (max-width: 480px) {
-  .quiz-start__difficulty-buttons {
-    flex-direction: column;
-    align-items: stretch;
+  .quiz-start__difficulty-buttons,
+  .quiz-start__mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   .quiz-difficulty-btn {
-    min-width: 100%;
+    min-width: 0;
+    padding: 10px 8px;
+    font-size: 0.95rem;
   }
 }

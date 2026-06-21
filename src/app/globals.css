@@ -2,7 +2,10 @@
    しん²スタディ - こども向けポップデザインシステム
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&display=swap');
+/* Google Fonts @import was removed — it blocked first paint with an external
+   network request. We now rely on the OS rounded Japanese font stack below,
+   which renders instantly on iOS/macOS (Hiragino Maru Gothic) and Android
+   (Noto/Roboto fallbacks). */
 
 /* --- CSS Variables --- */
 :root {
@@ -40,9 +43,11 @@
   --card-border: #5C4D4A;
   --card-hover-bg: #FFFDF0;
 
-  /* Fonts (Cute Rounded Japanese font) */
-  --font-japanese: 'M PLUS Rounded 1c', sans-serif;
-  --font-heading: 'M PLUS Rounded 1c', sans-serif;
+  /* Fonts (Cute Rounded Japanese font — OS-native stack, no web fonts) */
+  --font-japanese: 'Hiragino Maru Gothic ProN', 'ヒラギノ丸ゴ ProN W4',
+    'Hiragino Maru Gothic Pro', 'YuGothic', 'Yu Gothic', 'Meiryo',
+    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: var(--font-japanese);
 
   /* Spacing */
   --safe-area-top: env(safe-area-inset-top, 0px);
@@ -75,12 +80,9 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: 
-    radial-gradient(circle at 10% 20%, rgba(255, 118, 117, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 90% 15%, rgba(77, 150, 255, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 80% 85%, rgba(255, 217, 61, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 20% 80%, rgba(107, 203, 119, 0.07) 0%, transparent 25%),
-    var(--bg-gradient);
+  /* Simplified the background — 4 layered radial gradients caused a costly
+     full-page repaint on every layout pass. A single soft gradient is plenty. */
+  background: var(--bg-gradient);
   background-attachment: fixed;
 }
 
@@ -177,21 +179,16 @@ h1, h2, h3, h4, h5, h6 {
   50% { transform: translateY(-8px); }
 }
 
-/* --- Background decoration --- */
-/* Add a floating cloud shape in background */
-body::after {
-  content: '';
-  position: fixed;
-  top: 10%;
-  left: 5%;
-  width: 120px;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 50px;
-  filter: blur(10px);
-  pointer-events: none;
-  z-index: -1;
-  animation: float-slow 15s ease-in-out infinite;
+/* Floating-cloud decoration was removed: it forced a permanently composited
+   layer with blur(10px) on every frame, costly on iPad/older devices. */
+
+/* --- Reduced motion: respect user preference and reduce paint cost --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
 /* --- Scrollbar --- */

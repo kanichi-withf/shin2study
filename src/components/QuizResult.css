@@ -69,7 +69,8 @@
 .quiz-result__emoji {
   font-size: 6rem;
   margin-bottom: 12px;
-  animation: emoji-bounce-kids 1.2s ease infinite;
+  /* 3 bounces total instead of forever — enough celebration, no perma-paint. */
+  animation: emoji-bounce-kids 1.2s ease 0s 3;
   display: inline-block;
 }
 
@@ -186,9 +187,16 @@
 }
 
 .quiz-result__btn:active {
-  transform: translateY(6px);
-  box-shadow: var(--shadow-toy-active);
-  transition: none !important;
+  opacity: 0.8;
+}
+
+@media (hover: hover) {
+  .quiz-result__btn:active {
+    transform: translateY(6px);
+    box-shadow: var(--shadow-toy-active);
+    transition: none !important;
+    opacity: 1;
+  }
 }
 
 .quiz-result__btn--retry {

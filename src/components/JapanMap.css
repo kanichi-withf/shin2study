@@ -22,31 +22,27 @@
   animation: fadeIn 0.5s ease;
 }
 
-/* The injected SVG - Responsive scaling based on viewport orientation */
+/* The injected SVG - Responsive scaling based on viewport orientation
+   (drop-shadow filter removed — applying a CSS filter to a 200-path SVG forces
+   the renderer to rasterize the whole map into an offscreen layer every paint.
+   The container's box-shadow already provides depth.) */
 .japan-map-svg {
   width: 100%;
   height: auto;
   max-height: 45vh; /* Default constraint for portrait mode */
-  filter: drop-shadow(0 4px 6px rgba(92, 77, 74, 0.05));
   display: block;
 }
 
-/* Prefecture highlight animation - blinks between yellow and coral to catch the child's eye */
+/* Prefecture highlight - solid yellow/orange with a gentle stroke pulse.
+   Animating only stroke-width keeps the renderer on the cheap path (no filter
+   re-compositing, no fill animation that would invalidate caches every cycle). */
 .prefecture-highlighted {
-  animation: highlight-pulse 0.8s ease-in-out infinite !important;
+  animation: highlight-pulse 1.4s ease-in-out infinite !important;
 }
 
 @keyframes highlight-pulse {
-  0%, 100% {
-    fill: #FFD93D !important;
-    stroke: #FF9F43 !important;
-    stroke-width: 4px !important;
-  }
-  50% {
-    fill: #FF7675 !important;
-    stroke: #FF4D4D !important;
-    stroke-width: 5px !important;
-  }
+  0%, 100% { stroke-width: 3.5px !important; }
+  50%      { stroke-width: 5px !important; }
 }
 
 /* Responsive */

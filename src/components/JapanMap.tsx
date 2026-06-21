@@ -19,6 +19,25 @@ const HIGHLIGHT_STROKE = '#FF9F43';
 // Normalize code (remove leading zeros for comparison)
 const normalizeCode = (code: string) => String(parseInt(code, 10));
 
+// Module-scope cache so re-mounts (back/next navigation) hit the in-memory
+// copy instead of re-parsing 30 KB of SVG markup every time.
+// Reset on failure so a retry can succeed.
+let svgTextPromise: Promise<string> | null = null;
+function loadSvgText(): Promise<string> {
+  if (!svgTextPromise) {
+    svgTextPromise = fetch('/japan-map.svg')
+      .then(res => {
+        if (!res.ok) throw new Error(`japan-map.svg ${res.status}`);
+        return res.text();
+      })
+      .catch(err => {
+        svgTextPromise = null; // allow a fresh attempt next mount
+        throw err;
+      });
+  }
+  return svgTextPromise;
+}
+
 export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgLoadedRef = useRef(false);
@@ -42,20 +61,17 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
           el.style.fill = HIGHLIGHT_COLOR;
           el.style.stroke = HIGHLIGHT_STROKE;
           el.style.strokeWidth = '3.5';
-          el.style.filter = 'drop-shadow(0 0 8px rgba(255, 159, 67, 0.5))';
           el.classList.add('prefecture-highlighted');
         } else if (isAnswered) {
           el.style.fill = ANSWERED_COLOR;
           el.style.stroke = '#FFF';
           el.style.strokeWidth = '1.5';
-          el.style.filter = 'none';
           el.style.opacity = '1';
           el.classList.remove('prefecture-highlighted');
         } else {
           el.style.fill = DEFAULT_FILL;
           el.style.stroke = DEFAULT_STROKE;
           el.style.strokeWidth = '1.5';
-          el.style.filter = 'none';
           el.style.opacity = '1';
           el.classList.remove('prefecture-highlighted');
         }
@@ -67,8 +83,7 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
   useEffect(() => {
     if (svgLoadedRef.current || !containerRef.current) return;
 
-    fetch('/japan-map.svg')
-      .then(res => res.text())
+    loadSvgText()
       .then(svgText => {
         if (!containerRef.current) return;
         containerRef.current.innerHTML = svgText;
