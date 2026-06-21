@@ -90,10 +90,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+const FALLBACK_AUTH: AuthContextValue = {
+  user: null,
+  loading: false,
+  signInWithGoogle: async () => {
+    console.warn('signInWithGoogle called outside AuthProvider');
+  },
+  signOutUser: async () => {
+    console.warn('signOutUser called outside AuthProvider');
+  },
+};
+
 export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return ctx;
+  // Never throw — a missing provider should not blank the whole page.
+  // Pages can still detect "no user" and either skip auth-required work
+  // or prompt the user to log in via the AuthHeader.
+  return useContext(AuthContext) ?? FALLBACK_AUTH;
 }
