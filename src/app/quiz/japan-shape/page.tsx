@@ -284,7 +284,7 @@ function JapanShapeQuizInner() {
             />
           </div>
           <p className="quiz-question__text">この かたちは どこの けん？</p>
-          <div className="quiz-map">
+          <div className="quiz-map quiz-map--shape">
             <JapanMapShape code={state.currentPrefecture?.code ?? null} />
           </div>
         </section>
