@@ -1,49 +1,234 @@
+/* ============================================
+   しん²スタディ - こども向けポップデザインシステム
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&display=swap');
+
+/* --- CSS Variables --- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Bright, warm candy background */
+  --bg-primary: #FFFDF5;
+  --bg-secondary: #FFF9E6;
+  --bg-gradient: linear-gradient(135deg, #FFFDF5 0%, #FFF5E4 100%);
+
+  /* Warm dark brown for borders and text (much friendlier than black/navy) */
+  --text-primary: #5C4D4A;
+  --text-secondary: #7A6865;
+  --text-muted: #A89591;
+  --border-color: #5C4D4A;
+
+  /* Accent & Candy Colors */
+  --accent-primary: #FF7675; /* Soft strawberry pink */
+  --accent-secondary: #FF8E8E;
+  --accent-green: #6BCB77; /* Cute apple green */
+  --accent-green-light: #9DFFAC;
+  --accent-orange: #FF9F43; /* Sweet orange */
+  --accent-orange-light: #FFC285;
+  --accent-pink: #FF85A1; /* Candy pink */
+  --accent-yellow: #FFD93D; /* Sunny yellow */
+  --accent-blue: #4D96FF; /* Sky blue */
+  --accent-blue-light: #85B5FF;
+  --accent-red: #FF4D4D;
+
+  /* Timer colors */
+  --timer-green: #6BCB77;
+  --timer-yellow: #FFD93D;
+  --timer-red: #FF4D4D;
+
+  /* Card */
+  --card-bg: #FFFFFF;
+  --card-border: #5C4D4A;
+  --card-hover-bg: #FFFDF0;
+
+  /* Fonts (Cute Rounded Japanese font) */
+  --font-japanese: 'M PLUS Rounded 1c', sans-serif;
+  --font-heading: 'M PLUS Rounded 1c', sans-serif;
+
+  /* Spacing */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Radius (More rounded for kids) */
+  --radius-sm: 16px;
+  --radius-md: 24px;
+  --radius-lg: 36px;
+
+  /* Toy-like 3D borders and shadows */
+  --border-thick: 4px solid var(--border-color);
+  --border-medium: 3px solid var(--border-color);
+  --shadow-toy: 0 8px 0 var(--border-color);
+  --shadow-toy-hover: 0 10px 0 var(--border-color);
+  --shadow-toy-active: 0 3px 0 var(--border-color);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+body {
+  font-family: var(--font-japanese);
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  padding-top: var(--safe-area-top);
+  padding-bottom: var(--safe-area-bottom);
+  position: relative;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* iPad touch optimization */
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Prevent pull-to-refresh on iOS */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+/* --- Utility Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(15px, -20px) scale(1.05); }
+  66% { transform: translate(-10px, 15px) scale(0.95); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 118, 117, 0.4)); }
+  50% { filter: drop-shadow(0 0 16px rgba(255, 118, 117, 0.7)); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg) scale(1.05); }
+  75% { transform: rotate(5deg) scale(1.05); }
+}
+
+@keyframes kids-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* --- Background decoration --- */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(255, 118, 117, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 90% 15%, rgba(77, 150, 255, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 80% 85%, rgba(255, 217, 61, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 20% 80%, rgba(107, 203, 119, 0.07) 0%, transparent 25%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Add a floating cloud shape in background */
+body::after {
+  content: '';
+  position: fixed;
+  top: 10%;
+  left: 5%;
+  width: 120px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50px;
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 0;
+  animation: float-slow 15s ease-in-out infinite;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 4px;
+  border: 2px solid var(--bg-primary);
+}
+
+/* --- Focus visible --- */
+:focus-visible {
+  outline: 3px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* --- Media Queries --- */
+@media (max-width: 768px) {
   html {
-    color-scheme: dark;
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  html {
+    font-size: 15px;
   }
 }

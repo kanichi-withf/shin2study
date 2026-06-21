@@ -1,0 +1,242 @@
+/* ============================================
+   Home Page Styles - こども向けおもちゃパーク風
+   ============================================ */
+
+.home {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 48px 24px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- Header --- */
+.home__header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.home__logo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.home__logo-emoji {
+  font-size: 3.8rem;
+  animation: wiggle 2.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+.home__title {
+  font-size: 3.2rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  filter: drop-shadow(0 4px 0 rgba(92, 77, 74, 0.15));
+}
+
+.home__title-shin {
+  font-family: var(--font-japanese);
+  color: var(--accent-primary);
+  animation: kids-bounce 2s ease-in-out infinite;
+}
+
+.home__title-study {
+  font-family: var(--font-japanese);
+  color: var(--accent-blue);
+  animation: kids-bounce 2s ease-in-out infinite 0.2s;
+}
+
+.home__subtitle {
+  font-size: 1.4rem;
+  color: var(--text-secondary);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 4px 16px;
+  border-radius: 30px;
+  display: inline-block;
+  border: 2px dashed rgba(92, 77, 74, 0.2);
+}
+
+/* --- Card Grid --- */
+.home__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 28px;
+  max-width: 720px;
+  width: 100%;
+  margin-bottom: 48px;
+}
+
+.home__card-wrapper {
+  animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.home__card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border-radius: var(--radius-md);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-toy);
+  background: var(--card-bg);
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text-primary);
+  min-height: 130px;
+  transform: translateY(0);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home__card--active {
+  cursor: pointer;
+}
+
+.home__card--active:hover,
+.home__card--active:focus {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-toy-hover);
+}
+
+.home__card--active:active {
+  transform: translateY(4px);
+  box-shadow: var(--shadow-toy-active);
+}
+
+.home__card--locked {
+  cursor: default;
+  background: #F2EDE9;
+  border-color: #A89591;
+  box-shadow: 0 6px 0 #A89591;
+  color: #8C7B78;
+}
+
+.home__card-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.15; /* Subdued background color inside the white card */
+  z-index: 0;
+  transition: opacity 0.2s ease;
+}
+
+.home__card--active:hover .home__card-bg {
+  opacity: 0.25;
+}
+
+.home__card-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.home__card-emoji {
+  font-size: 2.8rem;
+  display: block;
+  margin-bottom: 6px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.home__card--active:hover .home__card-emoji {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.home__card-title {
+  font-size: 1.7rem;
+  font-weight: 900;
+  margin-bottom: 2px;
+  color: var(--text-primary);
+}
+
+.home__card--locked .home__card-title {
+  color: #8C7B78;
+}
+
+.home__card-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.home__card--locked .home__card-subtitle {
+  color: #A89591;
+}
+
+.home__card-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.home__card--locked .home__card-desc {
+  color: #A89591;
+}
+
+.home__card-arrow {
+  position: relative;
+  z-index: 1;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  font-weight: 900;
+  transition: transform 0.2s ease;
+}
+
+.home__card--active:hover .home__card-arrow {
+  transform: translateX(4px);
+  color: var(--accent-primary);
+}
+
+.home__card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  background: #A89591;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+/* --- Footer --- */
+.home__footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 24px 16px;
+  animation: fadeIn 1s ease both;
+  animation-delay: 0.5s;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .home {
+    padding: 32px 16px;
+  }
+
+  .home__title {
+    font-size: 2.6rem;
+  }
+
+  .home__logo-emoji {
+    font-size: 3.2rem;
+  }
+
+  .home__grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}

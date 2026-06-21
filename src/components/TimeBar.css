@@ -1,0 +1,90 @@
+.time-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 4px;
+}
+
+.time-bar__track {
+  flex: 1;
+  height: 32px;
+  background: #FFFDF7;
+  border-radius: var(--radius-sm);
+  border: var(--border-medium);
+  overflow: visible; /* Need visible to let the runner emoji overflow slightly */
+  position: relative;
+  box-shadow: inset 0 2px 5px rgba(92, 77, 74, 0.1);
+}
+
+.time-bar__fill {
+  height: 100%;
+  border-radius: 12px 0 0 12px;
+  transition: width 0.1s linear;
+  position: relative;
+}
+
+.time-bar__fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
+  border-radius: 12px 12px 0 0;
+}
+
+.time-bar__fill--green {
+  background: linear-gradient(90deg, #6BCB77, #9CFFAB);
+}
+
+.time-bar__fill--yellow {
+  background: linear-gradient(90deg, #FF9F43, #FFD93D);
+}
+
+.time-bar__fill--red {
+  background: linear-gradient(90deg, #FF4D4D, #FF8E8E);
+  animation: pulse-red 0.5s ease-in-out infinite;
+}
+
+/* Cute running character at the end of the bar */
+.time-bar__runner {
+  position: absolute;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2.2rem;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 10;
+  display: inline-block;
+  animation: runner-wiggle 0.4s linear infinite;
+  filter: drop-shadow(0 2px 4px rgba(92, 77, 74, 0.15));
+}
+
+.time-bar__icon {
+  font-size: 2.2rem;
+  min-width: 36px;
+  text-align: center;
+  animation: bounce-icon 1s ease infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes runner-wiggle {
+  0%, 100% {
+    transform: translateY(-50%) rotate(-6deg) scale(1);
+  }
+  50% {
+    transform: translateY(-60%) rotate(6deg) scale(1.08);
+  }
+}
+
+@keyframes bounce-icon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
