@@ -12,7 +12,7 @@ interface TimeBarProps {
 export default function TimeBar({ duration = 10, isRunning, onTimeUp }: TimeBarProps) {
   const [progress, setProgress] = useState(100);
   const startTimeRef = useRef<number | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Use a ref for onTimeUp to prevent effect from restarting when callback reference changes
   const onTimeUpRef = useRef(onTimeUp);
@@ -22,17 +22,20 @@ export default function TimeBar({ duration = 10, isRunning, onTimeUp }: TimeBarP
 
   useEffect(() => {
     if (!isRunning) {
-      setProgress(100);
       startTimeRef.current = null;
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
       return;
     }
 
     startTimeRef.current = Date.now();
 
-    const animate = () => {
+    // Update progress every 100ms (0.1s) to align with CSS transition
+    const updateInterval = 100;
+
+    timerRef.current = setInterval(() => {
       if (!startTimeRef.current) return;
       
       const elapsed = (Date.now() - startTimeRef.current) / 1000;
@@ -41,40 +44,42 @@ export default function TimeBar({ duration = 10, isRunning, onTimeUp }: TimeBarP
       setProgress(remaining);
       
       if (remaining <= 0) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
         onTimeUpRef.current();
-        return;
       }
-      
-      animationFrameRef.current = requestAnimationFrame(animate);
-    };
-
-    animationFrameRef.current = requestAnimationFrame(animate);
+    }, updateInterval);
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
     };
   }, [isRunning, duration]); // Removed onTimeUp from dependencies
 
+  const displayProgress = isRunning ? progress : 100;
+
   const getBarClass = () => {
-    if (progress > 60) return 'time-bar__fill--green';
-    if (progress > 30) return 'time-bar__fill--yellow';
+    if (displayProgress > 60) return 'time-bar__fill--green';
+    if (displayProgress > 30) return 'time-bar__fill--yellow';
     return 'time-bar__fill--red';
   };
 
   const getRunnerEmoji = () => {
-    if (progress > 60) return '🐰'; // Fast rabbit
-    if (progress > 30) return '🐥'; // Hurrying chick
+    if (displayProgress > 60) return '🐰'; // Fast rabbit
+    if (displayProgress > 30) return '🐥'; // Hurrying chick
     return '🐢'; // Slow turtle trying hard!
   };
 
   return (
-    <div className="time-bar" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
+    <div className="time-bar" role="progressbar" aria-valuenow={Math.round(displayProgress)} aria-valuemin={0} aria-valuemax={100}>
       <div className="time-bar__track">
         <div
           className={`time-bar__fill ${getBarClass()}`}
-          style={{ width: `${progress}%` }}
+          style={{ width: `${displayProgress}%` }}
         >
           {/* Cute character runner positioned at the edge of the bar */}
           <span className="time-bar__runner">

@@ -189,6 +189,7 @@
 .quiz-result__btn:active {
   transform: translateY(6px);
   box-shadow: var(--shadow-toy-active);
+  transition: none !important;
 }
 
 .quiz-result__btn--retry {

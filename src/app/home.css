@@ -103,8 +103,14 @@
   cursor: pointer;
 }
 
-.home__card--active:hover,
-.home__card--active:focus {
+@media (hover: hover) {
+  .home__card--active:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-toy-hover);
+  }
+}
+
+.home__card--active:focus-visible {
   transform: translateY(-4px);
   box-shadow: var(--shadow-toy-hover);
 }
@@ -112,6 +118,7 @@
 .home__card--active:active {
   transform: translateY(4px);
   box-shadow: var(--shadow-toy-active);
+  transition: none !important;
 }
 
 .home__card--locked {
@@ -130,8 +137,10 @@
   transition: opacity 0.2s ease;
 }
 
-.home__card--active:hover .home__card-bg {
-  opacity: 0.25;
+@media (hover: hover) {
+  .home__card--active:hover .home__card-bg {
+    opacity: 0.25;
+  }
 }
 
 .home__card-content {
@@ -147,8 +156,10 @@
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.home__card--active:hover .home__card-emoji {
-  transform: scale(1.15) rotate(5deg);
+@media (hover: hover) {
+  .home__card--active:hover .home__card-emoji {
+    transform: scale(1.15) rotate(5deg);
+  }
 }
 
 .home__card-title {
@@ -192,9 +203,11 @@
   transition: transform 0.2s ease;
 }
 
-.home__card--active:hover .home__card-arrow {
-  transform: translateX(4px);
-  color: var(--accent-primary);
+@media (hover: hover) {
+  .home__card--active:hover .home__card-arrow {
+    transform: translateX(4px);
+    color: var(--accent-primary);
+  }
 }
 
 .home__card-badge {

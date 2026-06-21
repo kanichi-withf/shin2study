@@ -29,7 +29,12 @@ export default function ChoiceButtons({ choices, correctAnswer, onAnswer, disabl
     return pref ? `${pref.kana} (${pref.name})` : choiceName;
   };
 
-  const buttonColors = ['choice-btn--color-1', 'choice-btn--color-2', 'choice-btn--color-3'];
+  const buttonColors = [
+    'choice-btn--color-1',
+    'choice-btn--color-2',
+    'choice-btn--color-3',
+    'choice-btn--color-4',
+  ];
 
   return (
     <div className="choice-buttons">
@@ -37,7 +42,7 @@ export default function ChoiceButtons({ choices, correctAnswer, onAnswer, disabl
         <button
           key={choice}
           id={`choice-${index}`}
-          className={`${getButtonClass(choice)} ${!showResult ? buttonColors[index] : ''}`}
+          className={`${getButtonClass(choice)} ${!showResult ? buttonColors[index % buttonColors.length] : ''}`}
           onClick={() => handleClick(choice)}
           disabled={disabled}
           aria-label={choice}

@@ -41,6 +41,7 @@
 .quiz-back-btn:active {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--border-color);
+  transition: none !important;
 }
 
 .quiz-start__card {
@@ -129,6 +130,7 @@
   transform: translateY(6px);
   box-shadow: var(--shadow-toy-active);
   animation: none;
+  transition: none !important;
 }
 
 /* --- Quiz Layout --- */
@@ -171,6 +173,7 @@
 .quiz-back-btn-small:active {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--border-color);
+  transition: none !important;
 }
 
 .quiz-progress {
@@ -372,6 +375,7 @@
 .quiz-difficulty-btn:active {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--border-color);
+  transition: none !important;
 }
 
 .quiz-difficulty-btn--active {

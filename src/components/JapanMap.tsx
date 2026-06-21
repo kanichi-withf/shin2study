@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import './JapanMap.css';
 
 interface JapanMapProps {
@@ -40,12 +40,53 @@ const DEFAULT_FILL = '#FFFFFF';    // White base for cleanliness
 const DEFAULT_STROKE = '#C5B5A5';  // Soft warm brown outline
 const HIGHLIGHT_STROKE = '#FF9F43';
 
+// Normalize code (remove leading zeros for comparison)
+const normalizeCode = (code: string) => String(parseInt(code, 10));
+
 export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgLoadedRef = useRef(false);
 
-  // Normalize code (remove leading zeros for comparison)
-  const normalizeCode = useCallback((code: string) => String(parseInt(code, 10)), []);
+  const applyStyles = () => {
+    if (!containerRef.current || !svgLoadedRef.current) return;
+
+    const prefectures = containerRef.current.querySelectorAll('.prefecture');
+    prefectures.forEach(pref => {
+      const code = (pref as HTMLElement).dataset.code;
+      if (!code) return;
+
+      const normCode = normalizeCode(code);
+      const isHighlighted = highlightedCode && normalizeCode(highlightedCode) === normCode;
+      const isAnswered = answeredCodes.some(c => normalizeCode(c) === normCode);
+
+      const shapes = pref.querySelectorAll('path, polygon');
+      shapes.forEach(shape => {
+        const el = shape as SVGElement;
+        if (isHighlighted) {
+          el.style.fill = HIGHLIGHT_COLOR;
+          el.style.stroke = HIGHLIGHT_STROKE;
+          el.style.strokeWidth = '3.5';
+          el.style.filter = 'drop-shadow(0 0 8px rgba(255, 159, 67, 0.5))';
+          el.classList.add('prefecture-highlighted');
+        } else if (isAnswered) {
+          const region = CODE_TO_REGION[normCode] || 'kanto';
+          el.style.fill = REGION_COLORS[region];
+          el.style.stroke = '#FFF';
+          el.style.strokeWidth = '1.5';
+          el.style.filter = 'none';
+          el.style.opacity = '1';
+          el.classList.remove('prefecture-highlighted');
+        } else {
+          el.style.fill = DEFAULT_FILL;
+          el.style.stroke = DEFAULT_STROKE;
+          el.style.strokeWidth = '1.5';
+          el.style.filter = 'none';
+          el.style.opacity = '1';
+          el.classList.remove('prefecture-highlighted');
+        }
+      });
+    });
+  };
 
   // Load SVG on mount
   useEffect(() => {
@@ -91,51 +132,11 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const applyStyles = useCallback(() => {
-    if (!containerRef.current || !svgLoadedRef.current) return;
-
-    const prefectures = containerRef.current.querySelectorAll('.prefecture');
-    prefectures.forEach(pref => {
-      const code = (pref as HTMLElement).dataset.code;
-      if (!code) return;
-
-      const normCode = normalizeCode(code);
-      const isHighlighted = highlightedCode && normalizeCode(highlightedCode) === normCode;
-      const isAnswered = answeredCodes.some(c => normalizeCode(c) === normCode);
-
-      const shapes = pref.querySelectorAll('path, polygon');
-      shapes.forEach(shape => {
-        const el = shape as SVGElement;
-        if (isHighlighted) {
-          el.style.fill = HIGHLIGHT_COLOR;
-          el.style.stroke = HIGHLIGHT_STROKE;
-          el.style.strokeWidth = '3.5';
-          el.style.filter = 'drop-shadow(0 0 8px rgba(255, 159, 67, 0.5))';
-          el.classList.add('prefecture-highlighted');
-        } else if (isAnswered) {
-          const region = CODE_TO_REGION[normCode] || 'kanto';
-          el.style.fill = REGION_COLORS[region];
-          el.style.stroke = '#FFF';
-          el.style.strokeWidth = '1.5';
-          el.style.filter = 'none';
-          el.style.opacity = '1';
-          el.classList.remove('prefecture-highlighted');
-        } else {
-          el.style.fill = DEFAULT_FILL;
-          el.style.stroke = DEFAULT_STROKE;
-          el.style.strokeWidth = '1.5';
-          el.style.filter = 'none';
-          el.style.opacity = '1';
-          el.classList.remove('prefecture-highlighted');
-        }
-      });
-    });
-  }, [highlightedCode, answeredCodes, normalizeCode]);
-
   // Update styles when highlighted or answered changes
   useEffect(() => {
     applyStyles();
-  }, [applyStyles]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightedCode, answeredCodes]);
 
   return (
     <div className="japan-map-container" ref={containerRef} role="img" aria-label="日本地図">

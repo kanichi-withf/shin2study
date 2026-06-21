@@ -39,7 +39,7 @@ function generateChoices(correct: PrefectureData, allPrefectures: PrefectureData
   const shuffled = shuffleArray(available);
 
   for (const pref of shuffled) {
-    if (wrongChoices.length >= 2) break;
+    if (wrongChoices.length >= 3) break;
     wrongChoices.push(pref.name);
   }
 

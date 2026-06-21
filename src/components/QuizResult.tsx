@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import './QuizResult.css';
 
@@ -11,14 +10,8 @@ interface QuizResultProps {
 }
 
 export default function QuizResult({ score, total, onRetry }: QuizResultProps) {
-  const [showConfetti, setShowConfetti] = useState(false);
   const percentage = Math.round((score / total) * 100);
-
-  useEffect(() => {
-    if (percentage >= 60) {
-      setShowConfetti(true);
-    }
-  }, [percentage]);
+  const showConfetti = percentage >= 60;
 
   const getMessage = () => {
     if (percentage === 100) return { text: 'パーフェクト！🌟', emoji: '👑' };
@@ -47,11 +40,11 @@ export default function QuizResult({ score, total, onRetry }: QuizResultProps) {
               key={i}
               className="confetti-piece"
               style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
+                left: `${(i * 27) % 100}%`,
+                animationDelay: `${(i * 0.17) % 2}s`,
+                animationDuration: `${2 + ((i * 0.43) % 3)}s`,
                 backgroundColor: ['#6C5CE7', '#00b894', '#fdcb6e', '#e17055', '#fd79a8', '#55efc4', '#a29bfe'][i % 7],
-                transform: `rotate(${Math.random() * 360}deg)`,
+                transform: `rotate(${(i * 37) % 360}deg)`,
               }}
             />
           ))}
