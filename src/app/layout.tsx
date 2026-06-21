@@ -27,7 +27,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head />
+      <head>
+        {/* Belt-and-suspenders with <IOSTouchFix /> below: same listener installed
+            from inline script (before hydration) and from useEffect (after mount). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.addEventListener("touchstart", function(){}, {passive: true});`,
+          }}
+        />
+      </head>
       <body>
         <IOSTouchFix />
         <AuthProvider>

@@ -3,12 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
-import {
-  getQuizStats,
-  listRecentAttempts,
-  type AttemptRecord,
-  type QuizStats,
-} from '@/lib/quiz-store';
+import type { AttemptRecord, QuizStats } from '@/lib/quiz-store';
 import './mypage.css';
 
 interface MistakeEntry {
@@ -65,10 +60,13 @@ export default function MyPage() {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    Promise.all([
-      getQuizStats(user.uid, 'japan-map'),
-      listRecentAttempts(user.uid, 10),
-    ])
+    import('@/lib/quiz-store')
+      .then(({ getQuizStats, listRecentAttempts }) =>
+        Promise.all([
+          getQuizStats(user.uid, 'japan-map'),
+          listRecentAttempts(user.uid, 10),
+        ]),
+      )
       .then(([s, a]) => {
         if (cancelled) return;
         setStats(s);

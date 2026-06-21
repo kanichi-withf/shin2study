@@ -7,7 +7,7 @@ import TimeBar from '@/components/TimeBar';
 import ChoiceButtons from '@/components/ChoiceButtons';
 import QuizResult from '@/components/QuizResult';
 import { useAuth } from '@/components/AuthProvider';
-import { saveQuizAttempt, type AttemptQuestion } from '@/lib/quiz-store';
+import type { AttemptQuestion } from '@/lib/quiz-store';
 import { PREFECTURES, PrefectureData } from '@/data/japan-map-data';
 import './japan-map-quiz.css';
 
@@ -149,13 +149,16 @@ export default function JapanMapQuizPage() {
     if (!user) return;
     if (savedAttemptRef.current === 'pending' || savedAttemptRef.current) return;
     savedAttemptRef.current = 'pending';
-    saveQuizAttempt(user.uid, {
-      quizId: 'japan-map',
-      score: state.score,
-      total: totalQuestions,
-      timeLimit,
-      questions: state.answers,
-    })
+    import('@/lib/quiz-store')
+      .then(({ saveQuizAttempt }) =>
+        saveQuizAttempt(user.uid, {
+          quizId: 'japan-map',
+          score: state.score,
+          total: totalQuestions,
+          timeLimit,
+          questions: state.answers,
+        }),
+      )
       .then((id) => {
         savedAttemptRef.current = id;
       })
