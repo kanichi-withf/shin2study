@@ -6,6 +6,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  pointer-events: none;
+}
+
+.auth-header > * {
+  pointer-events: auto;
 }
 
 .auth-header__signin {

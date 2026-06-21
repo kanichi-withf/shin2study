@@ -35,7 +35,7 @@ export default function AuthHeader() {
   };
 
   if (loading) {
-    return <div className="auth-header" aria-hidden="true" />;
+    return null;
   }
 
   if (!user) {

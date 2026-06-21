@@ -47,16 +47,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (next) => {
-      setUser(next);
+    let unsubscribe: (() => void) | null = null;
+    try {
+      unsubscribe = onAuthStateChanged(getFirebaseAuth(), (next) => {
+        setUser(next);
+        setLoading(false);
+        if (next) {
+          upsertUserProfile(next).catch((err) => {
+            console.error('failed to upsert user profile', err);
+          });
+        }
+      });
+    } catch (err) {
+      console.error('Firebase init failed', err);
       setLoading(false);
-      if (next) {
-        upsertUserProfile(next).catch((err) => {
-          console.error('failed to upsert user profile', err);
-        });
-      }
-    });
-    return () => unsubscribe();
+    }
+    return () => {
+      try {
+        unsubscribe?.();
+      } catch {}
+    };
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
@@ -65,7 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOutUser = useCallback(async () => {
-    await signOut(getFirebaseAuth());
+    try {
+      await signOut(getFirebaseAuth());
+    } catch (err) {
+      console.error('signOut failed', err);
+    }
   }, []);
 
   const value = useMemo<AuthContextValue>(
