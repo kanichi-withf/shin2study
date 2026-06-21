@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { Suspense, useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import JapanMap from '@/components/JapanMap';
 import TimeBar from '@/components/TimeBar';
 import ChoiceButtons from '@/components/ChoiceButtons';
@@ -49,22 +50,63 @@ function generateChoices(correct: PrefectureData, allPrefectures: PrefectureData
   return shuffleArray(choices);
 }
 
-export default function JapanMapQuizPage() {
-  const { user } = useAuth();
-  const [state, setState] = useState<QuizState>({
-    currentQuestion: 0,
+function makePlayingState(): QuizState {
+  const randomPref = PREFECTURES[Math.floor(Math.random() * PREFECTURES.length)];
+  const choices = generateChoices(randomPref, PREFECTURES);
+  return {
+    currentQuestion: 1,
     score: 0,
-    currentPrefecture: null,
-    choices: [],
-    phase: 'ready',
+    currentPrefecture: randomPref,
+    choices,
+    phase: 'playing',
     selectedAnswer: null,
     answeredCodes: [],
-    usedCodes: [],
+    usedCodes: [randomPref.code],
     answers: [],
-  });
+  };
+}
 
-  const [timeLimit, setTimeLimit] = useState(10); // 5s, 10s, 15s difficulty
-  const [totalQuestions, setTotalQuestions] = useState(10); // 10 or 47 questions mode
+const READY_STATE: QuizState = {
+  currentQuestion: 0,
+  score: 0,
+  currentPrefecture: null,
+  choices: [],
+  phase: 'ready',
+  selectedAnswer: null,
+  answeredCodes: [],
+  usedCodes: [],
+  answers: [],
+};
+
+export default function JapanMapQuizPage() {
+  return (
+    <Suspense fallback={null}>
+      <JapanMapQuizInner />
+    </Suspense>
+  );
+}
+
+function JapanMapQuizInner() {
+  const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const playFromUrl = searchParams?.get('play') === '1';
+  const qFromUrl = Number(searchParams?.get('q'));
+  const tFromUrlRaw = searchParams?.get('t');
+  const tFromUrl = tFromUrlRaw === null || tFromUrlRaw === undefined ? NaN : Number(tFromUrlRaw);
+
+  // If the form's URL fallback fired (?play=1), initialize directly in
+  // playing phase so the game starts without needing the React onSubmit
+  // handler to run.
+  const [state, setState] = useState<QuizState>(() =>
+    playFromUrl ? makePlayingState() : READY_STATE,
+  );
+
+  const [timeLimit, setTimeLimit] = useState(
+    Number.isFinite(tFromUrl) ? tFromUrl : 10,
+  );
+  const [totalQuestions, setTotalQuestions] = useState(
+    Number.isFinite(qFromUrl) && qFromUrl > 0 ? qFromUrl : 10,
+  );
   const [timerKey, setTimerKey] = useState(0);
   const savedAttemptRef = useRef<string | null>(null);
 
@@ -172,18 +214,29 @@ export default function JapanMapQuizPage() {
     startGame();
   }, [startGame]);
 
-  // Start screen — native form + select + submit button.
-  // Form submission is the most reliable click path across all browsers (incl iPad Chrome).
+  // Start screen — uses a native <form method="GET"> so submission works even
+  // if JavaScript fails to hydrate on older browsers (iPad Air 3 / iOS 15).
+  // When JS is alive, onSubmit handles it locally. When JS is dead, the form
+  // navigates to ?play=1&q=...&t=... and the page re-renders in playing phase
+  // thanks to the URL-driven initial state above.
   if (state.phase === 'ready') {
     return (
       <main className="quiz-page">
         <form
           className="qstart"
+          method="GET"
+          action=""
           onSubmit={(e) => {
-            e.preventDefault();
-            startGame();
+            try {
+              e.preventDefault();
+              startGame();
+            } catch {
+              // fall through to native form submission
+            }
           }}
         >
+          <input type="hidden" name="play" value="1" />
+
           <Link href="/" className="qstart__back" aria-label="もどる">
             ← もどる
           </Link>
@@ -197,6 +250,7 @@ export default function JapanMapQuizPage() {
               もんだいすう
               <select
                 className="qstart__select"
+                name="q"
                 value={totalQuestions}
                 onChange={(e) => setTotalQuestions(Number(e.target.value))}
               >
@@ -209,6 +263,7 @@ export default function JapanMapQuizPage() {
               じかん
               <select
                 className="qstart__select"
+                name="t"
                 value={timeLimit}
                 onChange={(e) => setTimeLimit(Number(e.target.value))}
               >

@@ -22,5 +22,12 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "typescript": "^5"
-  }
+  },
+  "browserslist": [
+    "iOS >= 14",
+    "Safari >= 14",
+    "Chrome >= 90",
+    "Firefox >= 90",
+    "Edge >= 90"
+  ]
 }
