@@ -266,15 +266,18 @@
   }
 }
 
-/* --- Quiz Layout --- */
+/* --- Quiz Layout ---
+   Switched to a simple scroll-friendly column layout that does not rely on
+   `100dvh` + `overflow: hidden`. Works the same on every browser back to
+   Safari 12 (iPad Air 3 territory). The page can grow taller than the
+   viewport and scroll naturally if a particular device shows everything
+   bigger than expected — better than visually breaking. */
 .quiz-layout {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
-  padding: 14px 16px 16px;
-  gap: 22px; /* extra space for section badges that hang above each card */
-  overflow: hidden;
+  padding: 14px 16px 24px;
+  gap: 24px;
 }
 
 /* --- Header --- */
@@ -368,11 +371,9 @@
 }
 
 .quiz-section--question {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 0;
   background:
     radial-gradient(circle at 12% 0%, rgba(255, 217, 61, 0.18), transparent 55%),
     radial-gradient(circle at 100% 100%, rgba(255, 159, 67, 0.12), transparent 60%),
@@ -380,7 +381,6 @@
 }
 
 .quiz-section--answer {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -447,12 +447,11 @@
 
 /* --- Map (inside question section) --- */
 .quiz-map {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
-  min-height: 0; /* Important for flex child sizing */
+  width: 100%;
 }
 
 /* --- Choices container --- */
