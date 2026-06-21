@@ -172,103 +172,62 @@ export default function JapanMapQuizPage() {
     startGame();
   }, [startGame]);
 
-  // Start screen
+  // Start screen — native form + select + submit button.
+  // Form submission is the most reliable click path across all browsers (incl iPad Chrome).
   if (state.phase === 'ready') {
     return (
       <main className="quiz-page">
-        <div className="quiz-start">
-          <Link href="/" className="quiz-back-btn" aria-label="もどる">
+        <form
+          className="qstart"
+          onSubmit={(e) => {
+            e.preventDefault();
+            startGame();
+          }}
+        >
+          <Link href="/" className="qstart__back" aria-label="もどる">
             ← もどる
           </Link>
-          <div className="quiz-start__card">
-            <span className="quiz-start__emoji">🗾</span>
-            <h1 className="quiz-start__title">にほんちず クイズ</h1>
-            <p className="quiz-start__desc">
-              ちずで ひかっている けんの<br className="quiz-start__br" />なまえを あてよう！
-            </p>
-            
-            <div className="quiz-start__selectors">
-              <div className="quiz-start__mode">
-                <p className="quiz-start__difficulty-label">
-                  もんだいすう を えらんでね：
-                </p>
-                <div className="quiz-start__mode-buttons">
-                  <button
-                    type="button"
-                    className={`quiz-difficulty-btn ${totalQuestions === 10 ? 'quiz-difficulty-btn--active' : ''}`}
-                    onClick={() => setTotalQuestions(10)}
-                  >
-                    🔟 10もん (ふつう)
-                  </button>
-                  <button
-                    type="button"
-                    className={`quiz-difficulty-btn ${totalQuestions === 47 ? 'quiz-difficulty-btn--active' : ''}`}
-                    onClick={() => setTotalQuestions(47)}
-                  >
-                    🗻 47もん (ぜんぶ)
-                  </button>
-                </div>
-              </div>
 
-              <div className="quiz-start__difficulty">
-                <p className="quiz-start__difficulty-label">
-                  じかん（むずかしさ）を<br className="quiz-start__br" />えらんでね：
-                </p>
-                <div className="quiz-start__difficulty-buttons">
-                  <button
-                    type="button"
-                    className={`quiz-difficulty-btn ${timeLimit === 0 ? 'quiz-difficulty-btn--active' : ''}`}
-                    onClick={() => setTimeLimit(0)}
-                  >
-                    🎈 むげん (なし)
-                  </button>
-                  <button
-                    type="button"
-                    className={`quiz-difficulty-btn ${timeLimit === 15 ? 'quiz-difficulty-btn--active' : ''}`}
-                    onClick={() => setTimeLimit(15)}
-                  >
-                    🐢 15びょう (かんたん)
-                  </button>
-                  <button
-                    type="button"
-                    className={`quiz-difficulty-btn ${timeLimit === 10 ? 'quiz-difficulty-btn--active' : ''}`}
-                    onClick={() => setTimeLimit(10)}
-                  >
-                    🐥 10びょう (ふつう)
-                  </button>
-                  <button
-                    type="button"
-                    className={`quiz-difficulty-btn ${timeLimit === 5 ? 'quiz-difficulty-btn--active' : ''}`}
-                    onClick={() => setTimeLimit(5)}
-                  >
-                    🐰 5びょう (むずかしい)
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div className="qstart__card">
+            <span className="qstart__emoji">🗾</span>
+            <h1 className="qstart__title">にほんちず クイズ</h1>
+            <p className="qstart__desc">けんの なまえを あてよう！</p>
 
-            <div className="quiz-start__info">
-              <div className="quiz-start__info-item">
-                <span className="quiz-start__info-icon">❓</span>
-                <span>{totalQuestions}もん</span>
-              </div>
-              <div className="quiz-start__info-item">
-                <span className="quiz-start__info-icon">⏰</span>
-                <span>{timeLimit === 0 ? 'なし' : `${timeLimit}びょう`}</span>
-              </div>
-            </div>
-            <div className="quiz-start__btn-wrapper">
-              <button
-                type="button"
-                className="quiz-start__btn"
-                onClick={startGame}
-                id="start-quiz-btn"
+            <label className="qstart__label">
+              もんだいすう
+              <select
+                className="qstart__select"
+                value={totalQuestions}
+                onChange={(e) => setTotalQuestions(Number(e.target.value))}
               >
-                🚀 スタート！
-              </button>
-            </div>
+                <option value={10}>10もん (ふつう)</option>
+                <option value={47}>47もん (ぜんぶ)</option>
+              </select>
+            </label>
+
+            <label className="qstart__label">
+              じかん
+              <select
+                className="qstart__select"
+                value={timeLimit}
+                onChange={(e) => setTimeLimit(Number(e.target.value))}
+              >
+                <option value={0}>むげん (じかんなし)</option>
+                <option value={15}>15びょう (かんたん)</option>
+                <option value={10}>10びょう (ふつう)</option>
+                <option value={5}>5びょう (むずかしい)</option>
+              </select>
+            </label>
+
+            <button
+              type="submit"
+              className="qstart__submit"
+              id="start-quiz-btn"
+            >
+              🚀 スタート！
+            </button>
           </div>
-        </div>
+        </form>
       </main>
     );
   }
