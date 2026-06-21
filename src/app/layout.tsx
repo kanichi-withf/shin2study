@@ -24,14 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head>
-        {/* Enable pseudo-class :active instantly on iOS/iPadOS Safari */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.addEventListener("touchstart", function(){}, {passive: true});`,
-          }}
-        />
-      </head>
+      <head />
       <body>
         {children}
       </body>

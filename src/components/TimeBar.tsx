@@ -21,7 +21,8 @@ export default function TimeBar({ duration = 10, isRunning, onTimeUp }: TimeBarP
   }, [onTimeUp]);
 
   useEffect(() => {
-    if (!isRunning) {
+    // If duration is 0, it means "unlimited time", so do not run countdown
+    if (!isRunning || duration === 0) {
       startTimeRef.current = null;
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -58,17 +59,19 @@ export default function TimeBar({ duration = 10, isRunning, onTimeUp }: TimeBarP
         timerRef.current = null;
       }
     };
-  }, [isRunning, duration]); // Removed onTimeUp from dependencies
+  }, [isRunning, duration]);
 
-  const displayProgress = isRunning ? progress : 100;
+  const displayProgress = (isRunning && duration !== 0) ? progress : 100;
 
   const getBarClass = () => {
+    if (duration === 0) return 'time-bar__fill--green'; // Always green on unlimited mode
     if (displayProgress > 60) return 'time-bar__fill--green';
     if (displayProgress > 30) return 'time-bar__fill--yellow';
     return 'time-bar__fill--red';
   };
 
   const getRunnerEmoji = () => {
+    if (duration === 0) return '🎈'; // Cute balloon for unlimited mode
     if (displayProgress > 60) return '🐰'; // Fast rabbit
     if (displayProgress > 30) return '🐥'; // Hurrying chick
     return '🐢'; // Slow turtle trying hard!

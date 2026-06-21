@@ -8,34 +8,10 @@ interface JapanMapProps {
   answeredCodes?: string[];
 }
 
-// Map data-code to region for coloring answered prefectures
-const CODE_TO_REGION: Record<string, string> = {
-  '1': 'hokkaido', '2': 'tohoku', '3': 'tohoku', '4': 'tohoku',
-  '5': 'tohoku', '6': 'tohoku', '7': 'tohoku',
-  '8': 'kanto', '9': 'kanto', '10': 'kanto', '11': 'kanto',
-  '12': 'kanto', '13': 'kanto', '14': 'kanto',
-  '15': 'chubu', '16': 'chubu', '17': 'chubu', '18': 'chubu',
-  '19': 'chubu', '20': 'chubu', '21': 'chubu', '22': 'chubu', '23': 'chubu',
-  '24': 'kinki', '25': 'kinki', '26': 'kinki', '27': 'kinki',
-  '28': 'kinki', '29': 'kinki', '30': 'kinki',
-  '31': 'chugoku', '32': 'chugoku', '33': 'chugoku', '34': 'chugoku', '35': 'chugoku',
-  '36': 'shikoku', '37': 'shikoku', '38': 'shikoku', '39': 'shikoku',
-  '40': 'kyushu', '41': 'kyushu', '42': 'kyushu', '43': 'kyushu',
-  '44': 'kyushu', '45': 'kyushu', '46': 'kyushu', '47': 'kyushu',
-};
 
-const REGION_COLORS: Record<string, string> = {
-  hokkaido: '#85B5FF', // Sky blue
-  tohoku: '#A59BFF',   // Lavender
-  kanto: '#6BCB77',    // Apple green
-  chubu: '#FFEAA7',    // Banana yellow
-  kinki: '#FF85A1',    // Bubblegum pink
-  chugoku: '#FF9F43',  // Peach orange
-  shikoku: '#81ECEC',  // Mint/Aqua
-  kyushu: '#FAB1A0',   // Soft coral
-};
 
 const HIGHLIGHT_COLOR = '#FFD93D'; // Sunny yellow
+const ANSWERED_COLOR = '#E2E8F0';  // Soft light gray for answered prefectures
 const DEFAULT_FILL = '#FFFFFF';    // White base for cleanliness
 const DEFAULT_STROKE = '#C5B5A5';  // Soft warm brown outline
 const HIGHLIGHT_STROKE = '#FF9F43';
@@ -69,8 +45,7 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
           el.style.filter = 'drop-shadow(0 0 8px rgba(255, 159, 67, 0.5))';
           el.classList.add('prefecture-highlighted');
         } else if (isAnswered) {
-          const region = CODE_TO_REGION[normCode] || 'kanto';
-          el.style.fill = REGION_COLORS[region];
+          el.style.fill = ANSWERED_COLOR;
           el.style.stroke = '#FFF';
           el.style.strokeWidth = '1.5';
           el.style.filter = 'none';

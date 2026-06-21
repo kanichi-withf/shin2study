@@ -39,8 +39,8 @@
 }
 
 .quiz-back-btn:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--border-color);
+  transform: scale(0.98);
+  box-shadow: 0 2px 0 var(--border-color);
   transition: none !important;
 }
 
@@ -60,7 +60,6 @@
   font-size: 5.5rem;
   display: block;
   margin-bottom: 16px;
-  animation: wiggle 3s ease-in-out infinite;
 }
 
 .quiz-start__title {
@@ -106,7 +105,6 @@
 
 .quiz-start__btn-wrapper {
   display: inline-block;
-  animation: float 2s ease-in-out infinite;
 }
 
 .quiz-start__btn {
@@ -125,14 +123,13 @@
   box-shadow: var(--shadow-toy);
   transform: translateY(0);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
-  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   min-height: 76px;
 }
 
 .quiz-start__btn:active {
-  transform: translateY(6px);
-  box-shadow: var(--shadow-toy-active);
+  transform: scale(0.98);
+  box-shadow: 0 4px 0 var(--border-color);
   transition: none !important;
 }
 
@@ -174,8 +171,8 @@
 }
 
 .quiz-back-btn-small:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--border-color);
+  transform: scale(0.98);
+  box-shadow: 0 2px 0 var(--border-color);
   transition: none !important;
 }
 
@@ -223,14 +220,16 @@
 
 /* --- Timer --- */
 .quiz-timer {
-  padding: 0 4px;
+  padding: 0;
+  margin: 0 -16px; /* 画面よこはばいっぱいに広げる（.quiz-layoutのpadding分を相殺） */
   flex-shrink: 0;
 }
 
 /* --- Question --- */
 .quiz-question {
   text-align: center;
-  padding: 4px;
+  padding: 4px 0;
+  margin: 0 -16px; /* 画面よこはばいっぱいに広げる（.quiz-layoutのpadding分を相殺） */
   flex-shrink: 0;
 }
 
@@ -279,16 +278,19 @@
   }
 
   .quiz-timer {
-    grid-column: 2;
+    grid-column: 1 / span 2;
     grid-row: 2;
-    margin-bottom: 4px;
+    /* 画面よこはばいっぱい（landscapeのpadding 24px分を相殺） */
+    margin: 0 -24px 4px;
   }
 
   .quiz-question {
-    grid-column: 2;
+    grid-column: 1 / span 2;
     grid-row: 3;
     text-align: center;
     padding: 4px 0;
+    /* 画面よこはばいっぱい（landscapeのpadding 24px分を相殺） */
+    margin: 0 -24px;
   }
 
   .quiz-question__text {
@@ -297,7 +299,7 @@
 
   .quiz-map {
     grid-column: 1;
-    grid-row: 2 / span 3;
+    grid-row: 4;
     height: 100%;
     min-height: 0;
     padding: 0;
@@ -371,21 +373,18 @@
   cursor: pointer;
   box-shadow: 0 4px 0 var(--border-color);
   transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
-  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
 .quiz-difficulty-btn:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--border-color);
+  transform: scale(0.98);
+  box-shadow: 0 2px 0 var(--border-color);
   transition: none !important;
 }
 
 .quiz-difficulty-btn--active {
   background: var(--accent-yellow) !important;
-  transform: scale(1.05);
   box-shadow: 0 4px 0 var(--border-color);
-  animation: wiggle 0.5s ease-in-out 1;
 }
 
 @media (max-width: 480px) {

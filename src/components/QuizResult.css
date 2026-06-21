@@ -178,7 +178,6 @@
   font-family: var(--font-japanese);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
-  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   text-decoration: none;
   min-height: 68px;

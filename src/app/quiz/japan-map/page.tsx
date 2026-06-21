@@ -164,6 +164,13 @@ export default function JapanMapQuizPage() {
               <div className="quiz-start__difficulty-buttons">
                 <button
                   type="button"
+                  className={`quiz-difficulty-btn ${timeLimit === 0 ? 'quiz-difficulty-btn--active' : ''}`}
+                  onClick={() => setTimeLimit(0)}
+                >
+                  🎈 むげん (なし)
+                </button>
+                <button
+                  type="button"
                   className={`quiz-difficulty-btn ${timeLimit === 15 ? 'quiz-difficulty-btn--active' : ''}`}
                   onClick={() => setTimeLimit(15)}
                 >
@@ -193,7 +200,7 @@ export default function JapanMapQuizPage() {
               </div>
               <div className="quiz-start__info-item">
                 <span className="quiz-start__info-icon">⏰</span>
-                <span>{timeLimit}びょう</span>
+                <span>{timeLimit === 0 ? 'なし' : `${timeLimit}びょう`}</span>
               </div>
             </div>
             <div className="quiz-start__btn-wrapper">

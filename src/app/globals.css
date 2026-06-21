@@ -75,11 +75,17 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(255, 118, 117, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 90% 15%, rgba(77, 150, 255, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 80% 85%, rgba(255, 217, 61, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 20% 80%, rgba(107, 203, 119, 0.07) 0%, transparent 25%),
+    var(--bg-gradient);
+  background-attachment: fixed;
 }
 
 body {
   font-family: var(--font-japanese);
-  background: var(--bg-gradient);
   color: var(--text-primary);
   min-height: 100vh;
   min-height: 100dvh;
@@ -87,15 +93,21 @@ body {
   padding-top: var(--safe-area-top);
   padding-bottom: var(--safe-area-bottom);
   position: relative;
+  background: transparent;
 }
 
 /* iPad touch optimization */
 button,
 a,
 [role="button"] {
-  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+}
+
+/* Ensure child elements of buttons and links do not block touch events */
+button *,
+a * {
+  pointer-events: none;
 }
 
 /* Prevent pull-to-refresh on iOS */
@@ -166,22 +178,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* --- Background decoration --- */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 10% 20%, rgba(255, 118, 117, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 90% 15%, rgba(77, 150, 255, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 80% 85%, rgba(255, 217, 61, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 20% 80%, rgba(107, 203, 119, 0.07) 0%, transparent 25%);
-  pointer-events: none;
-  z-index: 0;
-}
-
 /* Add a floating cloud shape in background */
 body::after {
   content: '';
@@ -194,7 +190,7 @@ body::after {
   border-radius: 50px;
   filter: blur(10px);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
   animation: float-slow 15s ease-in-out infinite;
 }
 

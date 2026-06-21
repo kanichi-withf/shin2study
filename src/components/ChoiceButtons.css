@@ -23,7 +23,6 @@
   color: white;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.2s ease;
-  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   min-height: 76px;
@@ -33,8 +32,8 @@
 }
 
 .choice-btn:active:not(:disabled) {
-  transform: translateY(6px);
-  box-shadow: var(--shadow-toy-active);
+  transform: scale(0.98);
+  box-shadow: 0 4px 0 var(--border-color);
   transition: none !important;
 }
 
@@ -63,7 +62,7 @@
 }
 
 .choice-btn--correct:active {
-  transform: translateY(6px) scale(1.04);
+  transform: scale(1.02);
   transition: none !important;
 }
 
