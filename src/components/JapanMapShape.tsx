@@ -9,7 +9,6 @@ interface JapanMapShapeProps {
 
 const HIGHLIGHT_FILL = '#FFD93D';
 const HIGHLIGHT_STROKE = '#FF9F43';
-const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const normalizeCode = (c: string) => String(parseInt(c, 10));
 
@@ -29,21 +28,6 @@ function loadSvgText(): Promise<string> {
   return svgTextPromise;
 }
 
-function parseMatrix(transform: string): {
-  a: number; d: number; e: number; f: number;
-} {
-  const m = transform.match(
-    /matrix\(\s*([-\d.]+)[ ,]+([-\d.]+)[ ,]+([-\d.]+)[ ,]+([-\d.]+)[ ,]+([-\d.]+)[ ,]+([-\d.]+)\s*\)/,
-  );
-  if (!m) return { a: 1, d: 1, e: 0, f: 0 };
-  return {
-    a: parseFloat(m[1]),
-    d: parseFloat(m[4]),
-    e: parseFloat(m[5]),
-    f: parseFloat(m[6]),
-  };
-}
-
 export default function JapanMapShape({ code }: JapanMapShapeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -56,72 +40,83 @@ export default function JapanMapShape({ code }: JapanMapShapeProps) {
       .then((svgText) => {
         if (cancelled || !container) return;
 
-        const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
-        const norm = normalizeCode(code);
-        const target = Array.from(
-          doc.querySelectorAll<SVGGElement>('.prefecture'),
-        ).find((g) => normalizeCode(g.dataset.code ?? '') === norm);
+        // Inject the whole map via innerHTML — same proven approach as
+        // <JapanMap />. Then hide every prefecture except the target so only
+        // the chosen shape shows, and zoom the viewBox onto it.
+        container.innerHTML = svgText;
+        const svg = container.querySelector('svg');
+        if (!svg) return;
 
-        if (!target) {
-          container.innerHTML =
-            '<div class="japan-shape-loading">けんが みつかりません</div>';
-          return;
-        }
-
-        const parentTransform =
-          doc.querySelector('.svg-map')?.getAttribute('transform') ?? '';
-        const { a, d, e, f } = parseMatrix(parentTransform);
-
-        // Build new isolated SVG. Set a placeholder viewBox immediately so the
-        // SVG has dimensions on first paint. We refine the viewBox after we
-        // can measure the cloned geometry.
-        const svg = document.createElementNS(SVG_NS, 'svg');
-        svg.setAttribute('xmlns', SVG_NS);
         svg.setAttribute('class', 'japan-shape-svg');
-        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-        svg.setAttribute('viewBox', '0 0 1000 1000');
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
 
-        const wrapper = document.createElementNS(SVG_NS, 'g');
-        if (parentTransform) wrapper.setAttribute('transform', parentTransform);
+        const boundary = container.querySelector('.boundary-line');
+        if (boundary) boundary.remove();
 
-        const clone = target.cloneNode(true) as SVGGElement;
-        clone.querySelectorAll('path, polygon').forEach((shape) => {
-          const el = shape as SVGElement;
-          el.style.fill = HIGHLIGHT_FILL;
-          el.style.stroke = HIGHLIGHT_STROKE;
-          el.style.strokeWidth = '2.5';
+        const norm = normalizeCode(code);
+        let target: SVGGElement | null = null;
+        const prefs = container.querySelectorAll<SVGGElement>('.prefecture');
+        prefs.forEach((g) => {
+          const c = g.dataset.code;
+          if (!c) return;
+          if (normalizeCode(c) === norm) {
+            target = g;
+            g.querySelectorAll<SVGElement>('path, polygon').forEach((el) => {
+              el.style.fill = HIGHLIGHT_FILL;
+              el.style.stroke = HIGHLIGHT_STROKE;
+              el.style.strokeWidth = '2.5';
+            });
+          } else {
+            g.style.display = 'none';
+          }
         });
-        wrapper.appendChild(clone);
-        svg.appendChild(wrapper);
-
-        container.innerHTML = '';
-        container.appendChild(svg);
+        if (!target) return;
 
         const refineViewBox = () => {
-          if (cancelled) return;
-          let raw: DOMRect | { x: number; y: number; width: number; height: number };
+          if (cancelled || !target || !svg) return;
+          let bbox: SVGRect;
           try {
-            raw = clone.getBBox();
+            bbox = (target as SVGGElement).getBBox();
           } catch {
             return;
           }
-          if (!raw || !raw.width || !raw.height) return;
+          if (!bbox.width || !bbox.height) return;
+          const ctm = (target as SVGGElement).getCTM();
+          if (!ctm) return;
 
-          // bbox in path-space → multiply by parent matrix to get SVG-space
-          const bx = raw.x * a + e;
-          const by = raw.y * d + f;
-          const bw = raw.width * a;
-          const bh = raw.height * d;
-          const pad = Math.max(bw, bh) * 0.08;
+          // Map all four corners of the bbox through the CTM so any nested
+          // ancestor transforms (the SVG has scale + translate on multiple
+          // parent <g>) are accounted for.
+          const pts = [
+            { x: bbox.x, y: bbox.y },
+            { x: bbox.x + bbox.width, y: bbox.y },
+            { x: bbox.x, y: bbox.y + bbox.height },
+            { x: bbox.x + bbox.width, y: bbox.y + bbox.height },
+          ];
+          const mapped = pts.map((p) => ({
+            x: ctm.a * p.x + ctm.c * p.y + ctm.e,
+            y: ctm.b * p.x + ctm.d * p.y + ctm.f,
+          }));
+          const xs = mapped.map((p) => p.x);
+          const ys = mapped.map((p) => p.y);
+          const minX = Math.min(...xs);
+          const maxX = Math.max(...xs);
+          const minY = Math.min(...ys);
+          const maxY = Math.max(...ys);
+          const w = maxX - minX;
+          const h = maxY - minY;
+          if (w === 0 || h === 0) return;
+          const pad = Math.max(w, h) * 0.1;
           svg.setAttribute(
             'viewBox',
-            `${bx - pad} ${by - pad} ${bw + pad * 2} ${bh + pad * 2}`,
+            `${minX - pad} ${minY - pad} ${w + pad * 2} ${h + pad * 2}`,
           );
+          svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
         };
 
-        // Try synchronously first (works in most modern browsers). Then also
-        // re-try on the next frame in case the synchronous getBBox returned 0
-        // because layout hadn't run yet (some older iOS Safari builds).
+        // Run synchronously where possible; rAF as a fallback for browsers
+        // that need a layout tick before getBBox / getCTM are populated.
         refineViewBox();
         requestAnimationFrame(refineViewBox);
       })
