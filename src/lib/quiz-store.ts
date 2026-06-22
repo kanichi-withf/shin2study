@@ -23,7 +23,13 @@ export type QuizId =
   | 'world-north-america'
   | 'world-south-america'
   | 'world-africa'
-  | 'world-oceania';
+  | 'world-oceania'
+  | 'world-capital-asia'
+  | 'world-capital-europe'
+  | 'world-capital-north-america'
+  | 'world-capital-south-america'
+  | 'world-capital-africa'
+  | 'world-capital-oceania';
 
 export interface AttemptQuestion {
   code: string;

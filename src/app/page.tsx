@@ -43,6 +43,16 @@ const quizzes = [
     available: true,
   },
   {
+    id: 'world-capital',
+    title: 'せかいのしゅと',
+    subtitle: '世界の首都クイズ',
+    emoji: '🏙️',
+    description: 'くにのしゅとをあてよう！',
+    href: '/quiz/world-capital',
+    gradient: 'linear-gradient(135deg, #4D96FF, #6BCB77)',
+    available: true,
+  },
+  {
     id: 'animals',
     title: 'どうぶつ',
     subtitle: '動物クイズ',

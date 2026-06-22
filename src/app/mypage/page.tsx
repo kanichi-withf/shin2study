@@ -25,6 +25,12 @@ const QUIZZES: Array<{ id: QuizId; emoji: string; title: string; href: string; m
   { id: 'world-south-america', emoji: '🦙', title: 'みなみアメリカ クイズ', href: '/quiz/world-map/south-america', mistakeLabel: 'くに' },
   { id: 'world-africa', emoji: '🦁', title: 'アフリカ クイズ', href: '/quiz/world-map/africa', mistakeLabel: 'くに' },
   { id: 'world-oceania', emoji: '🦘', title: 'オセアニア クイズ', href: '/quiz/world-map/oceania', mistakeLabel: 'くに' },
+  { id: 'world-capital-asia', emoji: '🏙️', title: 'アジア しゅと クイズ', href: '/quiz/world-capital/asia', mistakeLabel: 'しゅと' },
+  { id: 'world-capital-europe', emoji: '🏙️', title: 'ヨーロッパ しゅと クイズ', href: '/quiz/world-capital/europe', mistakeLabel: 'しゅと' },
+  { id: 'world-capital-north-america', emoji: '🏙️', title: 'きたアメリカ しゅと クイズ', href: '/quiz/world-capital/north-america', mistakeLabel: 'しゅと' },
+  { id: 'world-capital-south-america', emoji: '🏙️', title: 'みなみアメリカ しゅと クイズ', href: '/quiz/world-capital/south-america', mistakeLabel: 'しゅと' },
+  { id: 'world-capital-africa', emoji: '🏙️', title: 'アフリカ しゅと クイズ', href: '/quiz/world-capital/africa', mistakeLabel: 'しゅと' },
+  { id: 'world-capital-oceania', emoji: '🏙️', title: 'オセアニア しゅと クイズ', href: '/quiz/world-capital/oceania', mistakeLabel: 'しゅと' },
 ];
 
 function buildMistakeRanking(stats: QuizStats | null): MistakeEntry[] {
