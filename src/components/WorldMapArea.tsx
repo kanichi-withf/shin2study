@@ -172,6 +172,19 @@ export default function WorldMapArea({
           svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
         }
 
+        // The source SVG leaves unidentified shapes (e.g. Antarctica, small
+        // islands, multi-path country fragments) un-styled, which means the
+        // browser's SVG default of solid black fills them in. Walk every
+        // path/polygon once at mount and give it a neutral base colour so
+        // nothing renders as a black blob outside the active area.
+        containerRef.current
+          .querySelectorAll<SVGElement>('path, polygon')
+          .forEach((el) => {
+            el.style.fill = NON_AREA_FILL;
+            el.style.stroke = DEFAULT_STROKE;
+            el.style.strokeWidth = '0.7';
+          });
+
         applyStylesRef.current();
 
         const refine = () => {
