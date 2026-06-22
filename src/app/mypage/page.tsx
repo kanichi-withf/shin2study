@@ -17,6 +17,7 @@ interface MistakeEntry {
 
 const QUIZZES: Array<{ id: QuizId; emoji: string; title: string; href: string; mistakeLabel: string }> = [
   { id: 'japan-map', emoji: '🗾', title: 'にほんちず クイズ', href: '/quiz/japan-map', mistakeLabel: 'けん' },
+  { id: 'japan-capital', emoji: '🏛️', title: 'けんちょうしょざいち クイズ', href: '/quiz/japan-capital', mistakeLabel: 'けん' },
   { id: 'japan-shape', emoji: '🧩', title: 'けんのかたち クイズ', href: '/quiz/japan-shape', mistakeLabel: 'けん' },
   { id: 'world-asia', emoji: '🌏', title: 'アジア クイズ', href: '/quiz/world-map/asia', mistakeLabel: 'くに' },
   { id: 'world-europe', emoji: '🏰', title: 'ヨーロッパ クイズ', href: '/quiz/world-map/europe', mistakeLabel: 'くに' },

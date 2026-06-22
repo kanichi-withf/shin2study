@@ -17,6 +17,7 @@ import { getDb } from '@/lib/firebase';
 export type QuizId =
   | 'japan-map'
   | 'japan-shape'
+  | 'japan-capital'
   | 'world-asia'
   | 'world-europe'
   | 'world-north-america'

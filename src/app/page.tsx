@@ -13,6 +13,16 @@ const quizzes = [
     available: true,
   },
   {
+    id: 'japan-capital',
+    title: 'けんちょうしょざいち',
+    subtitle: '県庁所在地クイズ',
+    emoji: '🏛️',
+    description: 'けんちょうしょざいちを あてよう！',
+    href: '/quiz/japan-capital',
+    gradient: 'linear-gradient(135deg, #FF85A1, #FFD93D)',
+    available: true,
+  },
+  {
     id: 'japan-shape',
     title: 'けんのかたち',
     subtitle: '都道府県の形クイズ',
