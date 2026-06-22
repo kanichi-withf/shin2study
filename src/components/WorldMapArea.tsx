@@ -39,11 +39,15 @@ function loadSvgText(): Promise<string> {
  * `<path id="xx">` for single-path ones, so we accept both.
  */
 function findCountryElement(svg: SVGSVGElement, code: string): SVGGraphicsElement | null {
-  return (
-    (svg.querySelector(`g[id="${code}"]`) as SVGGraphicsElement | null) ||
-    (svg.querySelector(`path[id="${code}"]`) as SVGGraphicsElement | null) ||
-    null
-  );
+  // The current SVG uses uppercase ISO codes, but accept either case so the
+  // map source can be swapped without a rewrite of the lookup logic.
+  const candidates = [code, code.toUpperCase(), code.toLowerCase()];
+  for (const c of candidates) {
+    const found =
+      svg.querySelector(`g[id="${c}"]`) || svg.querySelector(`path[id="${c}"]`);
+    if (found) return found as SVGGraphicsElement;
+  }
+  return null;
 }
 
 interface Rect { x: number; y: number; w: number; h: number }

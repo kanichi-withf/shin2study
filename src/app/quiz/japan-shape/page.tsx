@@ -7,6 +7,7 @@ import JapanMapShape from '@/components/JapanMapShape';
 import TimeBar from '@/components/TimeBar';
 import ChoiceButtons from '@/components/ChoiceButtons';
 import QuizResult from '@/components/QuizResult';
+import QuizStartOptions from '@/components/QuizStartOptions';
 import { useAuth } from '@/components/AuthProvider';
 import type { AttemptQuestion } from '@/lib/quiz-store';
 import { PREFECTURES, PrefectureData } from '@/data/japan-map-data';
@@ -217,33 +218,29 @@ function JapanShapeQuizInner() {
             <h1 className="qstart__title">けんのかたち クイズ</h1>
             <p className="qstart__desc">かたちだけで どこの けんか あてよう！</p>
 
-            <label className="qstart__label">
-              もんだいすう
-              <select
-                className="qstart__select"
-                name="q"
-                value={totalQuestions}
-                onChange={(e) => setTotalQuestions(Number(e.target.value))}
-              >
-                <option value={10}>10もん (ふつう)</option>
-                <option value={47}>47もん (ぜんぶ)</option>
-              </select>
-            </label>
+            <QuizStartOptions
+              label="もんだいすう"
+              name="q"
+              value={totalQuestions}
+              onChange={setTotalQuestions}
+              options={[
+                { value: 10, label: '10もん\n(ふつう)' },
+                { value: 47, label: '47もん\n(ぜんぶ)' },
+              ]}
+            />
 
-            <label className="qstart__label">
-              じかん
-              <select
-                className="qstart__select"
-                name="t"
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(Number(e.target.value))}
-              >
-                <option value={0}>むげん (じかんなし)</option>
-                <option value={15}>15びょう (かんたん)</option>
-                <option value={10}>10びょう (ふつう)</option>
-                <option value={5}>5びょう (むずかしい)</option>
-              </select>
-            </label>
+            <QuizStartOptions
+              label="じかん"
+              name="t"
+              value={timeLimit}
+              onChange={setTimeLimit}
+              options={[
+                { value: 0, label: 'むげん\n(じかんなし)' },
+                { value: 15, label: '15びょう\n(かんたん)' },
+                { value: 10, label: '10びょう\n(ふつう)' },
+                { value: 5, label: '5びょう\n(むずかしい)' },
+              ]}
+            />
 
             <button type="submit" className="qstart__submit" id="start-quiz-btn">
               🚀 スタート！

@@ -28,11 +28,15 @@ function loadSvgText(): Promise<string> {
 }
 
 function findCountryElement(svg: SVGSVGElement, code: string): SVGGraphicsElement | null {
-  return (
-    (svg.querySelector(`g[id="${code}"]`) as SVGGraphicsElement | null) ||
-    (svg.querySelector(`path[id="${code}"]`) as SVGGraphicsElement | null) ||
-    null
-  );
+  // The current SVG uses uppercase ISO codes (e.g. JP), but tolerate either
+  // case so swapping the source SVG later doesn't break country lookup.
+  const candidates = [code, code.toUpperCase(), code.toLowerCase()];
+  for (const c of candidates) {
+    const found =
+      svg.querySelector(`g[id="${c}"]`) || svg.querySelector(`path[id="${c}"]`);
+    if (found) return found as SVGGraphicsElement;
+  }
+  return null;
 }
 
 /**

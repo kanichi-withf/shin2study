@@ -7,6 +7,7 @@ import WorldCountryShape from '@/components/WorldCountryShape';
 import TimeBar from '@/components/TimeBar';
 import ChoiceButtons from '@/components/ChoiceButtons';
 import QuizResult from '@/components/QuizResult';
+import QuizStartOptions from '@/components/QuizStartOptions';
 import { useAuth } from '@/components/AuthProvider';
 import type { AttemptQuestion, QuizId } from '@/lib/quiz-store';
 import {
@@ -260,36 +261,29 @@ function Inner({ area }: { area: AreaId }) {
               かたちだけで くにを あてよう！
             </p>
 
-            <label className="qstart__label">
-              もんだいすう
-              <select
-                className="qstart__select"
-                name="q"
-                value={totalQuestions}
-                onChange={(e) => setTotalQuestions(Number(e.target.value))}
-              >
-                {qOptions.map((n) => (
-                  <option key={n} value={n}>
-                    {n === maxQ ? `${n}もん (ぜんぶ)` : `${n}もん`}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <QuizStartOptions
+              label="もんだいすう"
+              name="q"
+              value={totalQuestions}
+              onChange={setTotalQuestions}
+              options={qOptions.map((n) => ({
+                value: n,
+                label: n === maxQ ? `${n}もん\n(ぜんぶ)` : `${n}もん`,
+              }))}
+            />
 
-            <label className="qstart__label">
-              じかん
-              <select
-                className="qstart__select"
-                name="t"
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(Number(e.target.value))}
-              >
-                <option value={0}>むげん (じかんなし)</option>
-                <option value={15}>15びょう (かんたん)</option>
-                <option value={10}>10びょう (ふつう)</option>
-                <option value={5}>5びょう (むずかしい)</option>
-              </select>
-            </label>
+            <QuizStartOptions
+              label="じかん"
+              name="t"
+              value={timeLimit}
+              onChange={setTimeLimit}
+              options={[
+                { value: 0, label: 'むげん\n(じかんなし)' },
+                { value: 15, label: '15びょう\n(かんたん)' },
+                { value: 10, label: '10びょう\n(ふつう)' },
+                { value: 5, label: '5びょう\n(むずかしい)' },
+              ]}
+            />
 
             <button type="submit" className="qstart__submit" id="start-quiz-btn">
               🚀 スタート！
