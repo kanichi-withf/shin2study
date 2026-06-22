@@ -35,13 +35,18 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+function formatCapital(p: PrefectureData): string {
+  // 4さいでもよめるよう、ひらがなを先頭に置き、漢字を括弧でそえる。
+  return `${p.capitalKana}（${p.capital}）`;
+}
+
 function pickChoices(correct: PrefectureData, all: PrefectureData[]): string[] {
   const wrong: string[] = [];
   for (const p of shuffle(all.filter((p) => p.code !== correct.code))) {
     if (wrong.length >= 3) break;
-    wrong.push(p.capital);
+    wrong.push(formatCapital(p));
   }
-  return shuffle([correct.capital, ...wrong]);
+  return shuffle([formatCapital(correct), ...wrong]);
 }
 
 function makePlayingState(): QuizState {
@@ -303,7 +308,9 @@ function Inner() {
           <div className="quiz-choices-container">
             <ChoiceButtons
               choices={state.choices}
-              correctAnswer={state.currentPrefecture?.capital ?? ''}
+              correctAnswer={
+                state.currentPrefecture ? formatCapital(state.currentPrefecture) : ''
+              }
               onAnswer={handleAnswer}
               disabled={state.phase !== 'playing'}
               showResult={
@@ -319,7 +326,7 @@ function Inner() {
           state.currentPrefecture &&
           (() => {
             const isCorrect =
-              state.selectedAnswer === state.currentPrefecture.capital;
+              state.selectedAnswer === formatCapital(state.currentPrefecture);
             const isTimeout = state.selectedAnswer === 'timeout';
             const isLast = state.currentQuestion >= totalQuestions;
             const p = state.currentPrefecture;
