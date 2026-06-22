@@ -18,6 +18,7 @@ export type QuizId =
   | 'japan-map'
   | 'japan-shape'
   | 'japan-capital'
+  | 'japan-specialty'
   | 'world-asia'
   | 'world-europe'
   | 'world-north-america'

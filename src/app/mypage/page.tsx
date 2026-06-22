@@ -19,6 +19,7 @@ const QUIZZES: Array<{ id: QuizId; emoji: string; title: string; href: string; m
   { id: 'japan-map', emoji: '🗾', title: 'にほんちず クイズ', href: '/quiz/japan-map', mistakeLabel: 'けん' },
   { id: 'japan-capital', emoji: '🏛️', title: 'けんちょうしょざいち クイズ', href: '/quiz/japan-capital', mistakeLabel: 'けん' },
   { id: 'japan-shape', emoji: '🧩', title: 'けんのかたち クイズ', href: '/quiz/japan-shape', mistakeLabel: 'けん' },
+  { id: 'japan-specialty', emoji: '🍎', title: 'めいさんひん クイズ', href: '/quiz/japan-specialty', mistakeLabel: 'めいさんひん' },
   { id: 'world-asia', emoji: '🌏', title: 'アジア クイズ', href: '/quiz/world-map/asia', mistakeLabel: 'くに' },
   { id: 'world-europe', emoji: '🏰', title: 'ヨーロッパ クイズ', href: '/quiz/world-map/europe', mistakeLabel: 'くに' },
   { id: 'world-north-america', emoji: '🗽', title: 'きたアメリカ クイズ', href: '/quiz/world-map/north-america', mistakeLabel: 'くに' },

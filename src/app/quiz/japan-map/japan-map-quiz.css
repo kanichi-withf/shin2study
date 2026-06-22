@@ -454,6 +454,38 @@
   min-height: clamp(360px, 50vh, 540px);
 }
 
+/* --- Specialty card (めいさんひんクイズ用) --- */
+.specialty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  min-height: clamp(280px, 40vh, 480px);
+  padding: 24px 16px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 217, 61, 0.22), transparent 65%),
+    linear-gradient(180deg, #FFFDF7 0%, #FFF6E0 100%);
+  border: 3px dashed rgba(92, 77, 74, 0.25);
+  border-radius: var(--radius-md);
+}
+
+.specialty-card__emoji {
+  font-size: clamp(7rem, 22vw, 11rem);
+  line-height: 1;
+  filter: drop-shadow(0 6px 0 rgba(92, 77, 74, 0.18));
+}
+
+.specialty-card__name {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 900;
+  font-family: var(--font-japanese);
+  color: var(--text-primary);
+  text-shadow: 0 2px 0 rgba(92, 77, 74, 0.12);
+  letter-spacing: 0.04em;
+}
+
 /* --- Choices container --- */
 .quiz-choices-container {
   position: relative;

@@ -72,6 +72,15 @@ const quizzes: Quiz[] = [
     available: true,
   },
   {
+    id: 'japan-specialty',
+    category: 'japan',
+    title: 'めいさんひん',
+    subtitle: '名産品',
+    emoji: '🍎',
+    href: '/quiz/japan-specialty',
+    available: true,
+  },
+  {
     id: 'world-map',
     category: 'world',
     title: 'せかいちず',
