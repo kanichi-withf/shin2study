@@ -127,8 +127,9 @@ function Inner({ area }: { area: AreaId }) {
   const pool = getCountriesInArea(area);
   const areaMeta = AREAS.find((a) => a.id === area)!;
 
-  // Cap default mode to the area's size (e.g. Oceania has only ~6 countries).
-  const defaultQ = Math.min(10, pool.length);
+  // Default to the full set of countries in the area — kids tend to pick the
+  // biggest option anyway and small areas like Oceania have only ~6 countries.
+  const defaultQ = pool.length;
   const maxQ = pool.length;
 
   const [state, setState] = useState<QuizState>(READY_STATE);
