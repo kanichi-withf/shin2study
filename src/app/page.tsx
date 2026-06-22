@@ -53,6 +53,16 @@ const quizzes = [
     available: true,
   },
   {
+    id: 'world-shape',
+    title: 'くにのかたち',
+    subtitle: '国の形クイズ',
+    emoji: '🧩',
+    description: 'かたちだけで くにを あてよう！',
+    href: '/quiz/world-shape',
+    gradient: 'linear-gradient(135deg, #A55EEA, #FF9F43)',
+    available: true,
+  },
+  {
     id: 'animals',
     title: 'どうぶつ',
     subtitle: '動物クイズ',

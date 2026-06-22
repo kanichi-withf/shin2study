@@ -31,6 +31,12 @@ const QUIZZES: Array<{ id: QuizId; emoji: string; title: string; href: string; m
   { id: 'world-capital-south-america', emoji: '🏙️', title: 'みなみアメリカ しゅと クイズ', href: '/quiz/world-capital/south-america', mistakeLabel: 'しゅと' },
   { id: 'world-capital-africa', emoji: '🏙️', title: 'アフリカ しゅと クイズ', href: '/quiz/world-capital/africa', mistakeLabel: 'しゅと' },
   { id: 'world-capital-oceania', emoji: '🏙️', title: 'オセアニア しゅと クイズ', href: '/quiz/world-capital/oceania', mistakeLabel: 'しゅと' },
+  { id: 'world-shape-asia', emoji: '🧩', title: 'アジア かたち クイズ', href: '/quiz/world-shape/asia', mistakeLabel: 'くに' },
+  { id: 'world-shape-europe', emoji: '🧩', title: 'ヨーロッパ かたち クイズ', href: '/quiz/world-shape/europe', mistakeLabel: 'くに' },
+  { id: 'world-shape-north-america', emoji: '🧩', title: 'きたアメリカ かたち クイズ', href: '/quiz/world-shape/north-america', mistakeLabel: 'くに' },
+  { id: 'world-shape-south-america', emoji: '🧩', title: 'みなみアメリカ かたち クイズ', href: '/quiz/world-shape/south-america', mistakeLabel: 'くに' },
+  { id: 'world-shape-africa', emoji: '🧩', title: 'アフリカ かたち クイズ', href: '/quiz/world-shape/africa', mistakeLabel: 'くに' },
+  { id: 'world-shape-oceania', emoji: '🧩', title: 'オセアニア かたち クイズ', href: '/quiz/world-shape/oceania', mistakeLabel: 'くに' },
 ];
 
 function buildMistakeRanking(stats: QuizStats | null): MistakeEntry[] {

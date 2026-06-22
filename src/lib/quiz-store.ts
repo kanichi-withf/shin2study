@@ -29,7 +29,13 @@ export type QuizId =
   | 'world-capital-north-america'
   | 'world-capital-south-america'
   | 'world-capital-africa'
-  | 'world-capital-oceania';
+  | 'world-capital-oceania'
+  | 'world-shape-asia'
+  | 'world-shape-europe'
+  | 'world-shape-north-america'
+  | 'world-shape-south-america'
+  | 'world-shape-africa'
+  | 'world-shape-oceania';
 
 export interface AttemptQuestion {
   code: string;
