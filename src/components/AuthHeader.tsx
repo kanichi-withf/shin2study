@@ -1,6 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import './AuthHeader.css';
@@ -9,6 +11,13 @@ export default function AuthHeader() {
   const { user, loading, signInWithGoogle, signOutUser } = useAuth();
   const [busy, setBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Quiz pages have their own top bar (progress + score). The floating avatar
+  // would collide with that bar, and login isn't needed mid-game anyway —
+  // suppress the AuthHeader entirely while on a quiz route. Login is still
+  // accessible from the home page and the mypage.
+  if (pathname?.startsWith('/quiz/')) return null;
 
   const handleSignIn = async () => {
     if (busy) return;
@@ -67,12 +76,14 @@ export default function AuthHeader() {
           aria-label="メニュー"
         >
           {user.photoURL ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={user.photoURL}
               alt=""
+              width={48}
+              height={48}
               className="auth-header__avatar-img"
               referrerPolicy="no-referrer"
+              unoptimized
             />
           ) : (
             <span className="auth-header__avatar-fallback">{initial}</span>

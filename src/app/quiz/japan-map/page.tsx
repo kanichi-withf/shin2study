@@ -94,12 +94,11 @@ function JapanMapQuizInner() {
   const tFromUrlRaw = searchParams?.get('t');
   const tFromUrl = tFromUrlRaw === null || tFromUrlRaw === undefined ? NaN : Number(tFromUrlRaw);
 
-  // If the form's URL fallback fired (?play=1), initialize directly in
-  // playing phase so the game starts without needing the React onSubmit
-  // handler to run.
-  const [state, setState] = useState<QuizState>(() =>
-    playFromUrl ? makePlayingState() : READY_STATE,
-  );
+  // Always start with READY_STATE so server and client render the same HTML —
+  // Math.random() in a useState initializer caused a hydration mismatch when
+  // the form's URL fallback (?play=1) was used. The playing-phase transition
+  // is handled in an effect below instead, which only runs on the client.
+  const [state, setState] = useState<QuizState>(READY_STATE);
 
   const [timeLimit, setTimeLimit] = useState(
     Number.isFinite(tFromUrl) ? tFromUrl : 10,
@@ -109,6 +108,7 @@ function JapanMapQuizInner() {
   );
   const [timerKey, setTimerKey] = useState(0);
   const savedAttemptRef = useRef<string | null>(null);
+  const urlPlayConsumedRef = useRef(false);
 
   const startGame = useCallback(() => {
     const randomPref = PREFECTURES[Math.floor(Math.random() * PREFECTURES.length)];
@@ -185,6 +185,17 @@ function JapanMapQuizInner() {
     if (state.phase !== 'playing') return;
     handleAnswer('timeout', false);
   }, [state.phase, handleAnswer]);
+
+  // Honor ?play=1 by jumping into playing state once on the client. The flag
+  // ref prevents the effect from re-triggering when state changes back to
+  // 'ready' for any reason.
+  useEffect(() => {
+    if (!playFromUrl) return;
+    if (urlPlayConsumedRef.current) return;
+    urlPlayConsumedRef.current = true;
+    setState(makePlayingState());
+    setTimerKey((k) => k + 1);
+  }, [playFromUrl]);
 
   useEffect(() => {
     if (state.phase !== 'result') return;
@@ -321,10 +332,6 @@ function JapanMapQuizInner() {
 
         {/* Question section */}
         <section className="quiz-section quiz-section--question">
-          <div className="quiz-section__badge quiz-section__badge--question">
-            <span className="quiz-section__badge-icon">🎯</span>
-            <span className="quiz-section__badge-text">もんだい</span>
-          </div>
           <div className="quiz-timer">
             <TimeBar
               key={timerKey}
@@ -344,10 +351,6 @@ function JapanMapQuizInner() {
 
         {/* Answer section */}
         <section className="quiz-section quiz-section--answer">
-          <div className="quiz-section__badge quiz-section__badge--answer">
-            <span className="quiz-section__badge-icon">✋</span>
-            <span className="quiz-section__badge-text">こたえを えらぼう</span>
-          </div>
           <div className="quiz-choices-container">
             <ChoiceButtons
               choices={state.choices}

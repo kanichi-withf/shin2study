@@ -15,9 +15,15 @@ interface MistakeEntry {
   wrongRate: number;
 }
 
-const QUIZZES: Array<{ id: QuizId; emoji: string; title: string; href: string }> = [
-  { id: 'japan-map', emoji: '🗾', title: 'にほんちず クイズ', href: '/quiz/japan-map' },
-  { id: 'japan-shape', emoji: '🧩', title: 'けんのかたち クイズ', href: '/quiz/japan-shape' },
+const QUIZZES: Array<{ id: QuizId; emoji: string; title: string; href: string; mistakeLabel: string }> = [
+  { id: 'japan-map', emoji: '🗾', title: 'にほんちず クイズ', href: '/quiz/japan-map', mistakeLabel: 'けん' },
+  { id: 'japan-shape', emoji: '🧩', title: 'けんのかたち クイズ', href: '/quiz/japan-shape', mistakeLabel: 'けん' },
+  { id: 'world-asia', emoji: '🌏', title: 'アジア クイズ', href: '/quiz/world-map/asia', mistakeLabel: 'くに' },
+  { id: 'world-europe', emoji: '🏰', title: 'ヨーロッパ クイズ', href: '/quiz/world-map/europe', mistakeLabel: 'くに' },
+  { id: 'world-north-america', emoji: '🗽', title: 'きたアメリカ クイズ', href: '/quiz/world-map/north-america', mistakeLabel: 'くに' },
+  { id: 'world-south-america', emoji: '🦙', title: 'みなみアメリカ クイズ', href: '/quiz/world-map/south-america', mistakeLabel: 'くに' },
+  { id: 'world-africa', emoji: '🦁', title: 'アフリカ クイズ', href: '/quiz/world-map/africa', mistakeLabel: 'くに' },
+  { id: 'world-oceania', emoji: '🦘', title: 'オセアニア クイズ', href: '/quiz/world-map/oceania', mistakeLabel: 'くに' },
 ];
 
 function buildMistakeRanking(stats: QuizStats | null): MistakeEntry[] {
@@ -57,14 +63,9 @@ function formatDate(ts: AttemptRecord['createdAt']): string {
 }
 
 function quizLabel(id: QuizId): string {
-  switch (id) {
-    case 'japan-map':
-      return '🗾 にほんちず';
-    case 'japan-shape':
-      return '🧩 けんのかたち';
-    default:
-      return id;
-  }
+  const q = QUIZZES.find((q) => q.id === id);
+  if (!q) return id;
+  return `${q.emoji} ${q.title.replace(' クイズ', '')}`;
 }
 
 export default function MyPage() {
@@ -152,8 +153,9 @@ export default function MyPage() {
         <p className="mypage__loading">きろくを よみこんでいます…</p>
       )}
 
-      {QUIZZES.map((quiz) => {
-        const stats = statsByQuiz[quiz.id] ?? null;
+      {/* Played quizzes: show stats + mistake ranking */}
+      {QUIZZES.filter((q) => (statsByQuiz[q.id]?.totalAttempts ?? 0) > 0).map((quiz) => {
+        const stats = statsByQuiz[quiz.id]!;
         const ranking = buildMistakeRanking(stats);
         return (
           <div key={quiz.id}>
@@ -161,36 +163,30 @@ export default function MyPage() {
               <h2 className="mypage__section-title">
                 {quiz.emoji} {quiz.title}
               </h2>
-              {stats && stats.totalAttempts > 0 ? (
-                <div className="mypage__stats-grid">
-                  <div className="mypage__stat-card">
-                    <div className="mypage__stat-label">ちょうせんかいすう</div>
-                    <div className="mypage__stat-value">{stats.totalAttempts} かい</div>
-                  </div>
-                  <div className="mypage__stat-card mypage__stat-card--best">
-                    <div className="mypage__stat-label">ベストスコア</div>
-                    <div className="mypage__stat-value">
-                      {stats.bestScore} / {stats.bestTotal}
-                    </div>
-                  </div>
-                  <div className="mypage__stat-card">
-                    <div className="mypage__stat-label">さいきんのスコア</div>
-                    <div className="mypage__stat-value">
-                      {stats.lastScore} / {stats.lastTotal}
-                    </div>
+              <div className="mypage__stats-grid">
+                <div className="mypage__stat-card">
+                  <div className="mypage__stat-label">ちょうせんかいすう</div>
+                  <div className="mypage__stat-value">{stats.totalAttempts} かい</div>
+                </div>
+                <div className="mypage__stat-card mypage__stat-card--best">
+                  <div className="mypage__stat-label">ベストスコア</div>
+                  <div className="mypage__stat-value">
+                    {stats.bestScore} / {stats.bestTotal}
                   </div>
                 </div>
-              ) : (
-                <p className="mypage__empty">
-                  まだ きろくが ないよ。<Link href={quiz.href}>はじめて みよう！</Link>
-                </p>
-              )}
+                <div className="mypage__stat-card">
+                  <div className="mypage__stat-label">さいきんのスコア</div>
+                  <div className="mypage__stat-value">
+                    {stats.lastScore} / {stats.lastTotal}
+                  </div>
+                </div>
+              </div>
             </section>
 
             {ranking.length > 0 && (
               <section className="mypage__section">
                 <h2 className="mypage__section-title">
-                  😢 よく まちがえる けん ({quiz.emoji})
+                  😢 よく まちがえる {quiz.mistakeLabel} ({quiz.emoji})
                 </h2>
                 <ol className="mypage__ranking">
                   {ranking.map((item, idx) => (
@@ -211,6 +207,30 @@ export default function MyPage() {
           </div>
         );
       })}
+
+      {/* Unplayed quizzes: compact list of "try me" cards */}
+      {(() => {
+        const unplayed = QUIZZES.filter(
+          (q) => (statsByQuiz[q.id]?.totalAttempts ?? 0) === 0,
+        );
+        if (unplayed.length === 0) return null;
+        return (
+          <section className="mypage__section">
+            <h2 className="mypage__section-title">🆕 まだ やってない クイズ</h2>
+            <ul className="mypage__unplayed">
+              {unplayed.map((q) => (
+                <li key={q.id}>
+                  <Link href={q.href} className="mypage__unplayed-link">
+                    <span className="mypage__unplayed-emoji">{q.emoji}</span>
+                    <span className="mypage__unplayed-title">{q.title}</span>
+                    <span className="mypage__unplayed-arrow">▶</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })()}
 
       <section className="mypage__section">
         <h2 className="mypage__section-title">🕒 さいきんの ちょうせん</h2>

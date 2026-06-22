@@ -14,7 +14,15 @@ import {
 } from 'firebase/firestore';
 import { getDb } from '@/lib/firebase';
 
-export type QuizId = 'japan-map' | 'japan-shape';
+export type QuizId =
+  | 'japan-map'
+  | 'japan-shape'
+  | 'world-asia'
+  | 'world-europe'
+  | 'world-north-america'
+  | 'world-south-america'
+  | 'world-africa'
+  | 'world-oceania';
 
 export interface AttemptQuestion {
   code: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import './JapanMap.css';
 
 interface JapanMapProps {
@@ -42,7 +42,7 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
   const containerRef = useRef<HTMLDivElement>(null);
   const svgLoadedRef = useRef(false);
 
-  const applyStyles = () => {
+  const applyStyles = useCallback(() => {
     if (!containerRef.current || !svgLoadedRef.current) return;
 
     const prefectures = containerRef.current.querySelectorAll('.prefecture');
@@ -77,7 +77,15 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
         }
       });
     });
-  };
+  }, [highlightedCode, answeredCodes]);
+
+  // applyStyles changes on every prop tick, but the mount effect only wants
+  // the latest function — keep it behind a ref so the mount effect can stay
+  // dependency-free.
+  const applyStylesRef = useRef(applyStyles);
+  useEffect(() => {
+    applyStylesRef.current = applyStyles;
+  }, [applyStyles]);
 
   // Load SVG on mount
   useEffect(() => {
@@ -89,7 +97,6 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
         containerRef.current.innerHTML = svgText;
         svgLoadedRef.current = true;
 
-        // Apply theme base styles to the SVG
         const svg = containerRef.current.querySelector('svg');
         if (svg) {
           svg.setAttribute('class', 'japan-map-svg');
@@ -97,13 +104,11 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
           svg.removeAttribute('height');
         }
 
-        // Remove boundary lines for cleaner look
         const boundaryGroup = containerRef.current.querySelector('.boundary-line');
         if (boundaryGroup) {
           boundaryGroup.remove();
         }
 
-        // Style all prefecture groups
         const prefectures = containerRef.current.querySelectorAll('.prefecture');
         prefectures.forEach(pref => {
           const shapes = pref.querySelectorAll('path, polygon');
@@ -115,18 +120,15 @@ export default function JapanMap({ highlightedCode, answeredCodes = [] }: JapanM
           });
         });
 
-        // Apply highlighting
-        applyStyles();
+        applyStylesRef.current();
       })
       .catch(err => console.error('Failed to load Japan map SVG:', err));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update styles when highlighted or answered changes
   useEffect(() => {
     applyStyles();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [highlightedCode, answeredCodes]);
+  }, [applyStyles]);
 
   return (
     <div className="japan-map-container" ref={containerRef} role="img" aria-label="日本地図">

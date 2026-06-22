@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { PREFECTURES } from '@/data/japan-map-data';
 import './JapanMapShape.css';
 
 interface JapanMapShapeProps {
@@ -9,15 +10,26 @@ interface JapanMapShapeProps {
 
 const HIGHLIGHT_FILL = '#FFD93D';
 const HIGHLIGHT_STROKE = '#FF9F43';
+const HIGHLIGHT_STROKE_WIDTH = '2.5';
+
+// PA4KEV's SVG labels prefectures by inkscape:label using lowercase romaji,
+// matching PREFECTURES.romaji except for Niigata which is spelled 'nigata'.
+const LABEL_OVERRIDES: Record<string, string> = {
+  Niigata: 'nigata',
+};
+
+function romajiToLabel(romaji: string): string {
+  return (LABEL_OVERRIDES[romaji] ?? romaji).toLowerCase();
+}
 
 const normalizeCode = (c: string) => String(parseInt(c, 10));
 
 let svgTextPromise: Promise<string> | null = null;
 function loadSvgText(): Promise<string> {
   if (!svgTextPromise) {
-    svgTextPromise = fetch('/japan-map.svg')
+    svgTextPromise = fetch('/japan-prefectures-detailed.svg')
       .then((res) => {
-        if (!res.ok) throw new Error(`japan-map.svg ${res.status}`);
+        if (!res.ok) throw new Error(`japan-prefectures-detailed.svg ${res.status}`);
         return res.text();
       })
       .catch((err) => {
@@ -28,6 +40,84 @@ function loadSvgText(): Promise<string> {
   return svgTextPromise;
 }
 
+function findTargetGroup(svg: SVGSVGElement, label: string): SVGGElement | null {
+  // Inkscape uses an XML namespace attribute that querySelector can't match
+  // directly. Iterate <g> elements and check the namespaced attribute.
+  const groups = svg.querySelectorAll('g');
+  for (const g of Array.from(groups)) {
+    const attr =
+      g.getAttribute('inkscape:label') ?? g.getAttributeNS(null, 'inkscape:label');
+    if (!attr) continue;
+    if (attr.toLowerCase() === label) return g as SVGGElement;
+  }
+  return null;
+}
+
+/**
+ * Hide every element in the SVG that is not on the path from the SVG root to
+ * the target (i.e. not an ancestor of the target) and not a descendant of the
+ * target. This isolates the target's shape without depending on knowledge of
+ * the SVG's specific grouping (regions, layers, islands, etc.).
+ */
+function showOnlyTarget(svg: SVGSVGElement, target: SVGGElement) {
+  const chain = new Set<Element>();
+  let cur: Element | null = target;
+  while (cur && cur !== svg) {
+    chain.add(cur);
+    cur = cur.parentElement;
+  }
+  chain.add(svg);
+  for (const ancestor of chain) {
+    if (ancestor === target) continue;
+    for (const child of Array.from(ancestor.children)) {
+      if (!chain.has(child)) {
+        (child as HTMLElement).style.display = 'none';
+      }
+    }
+  }
+}
+
+function styleHighlight(target: SVGGElement) {
+  target.querySelectorAll<SVGElement>('path, polygon, polyline').forEach((el) => {
+    el.style.fill = HIGHLIGHT_FILL;
+    el.style.stroke = HIGHLIGHT_STROKE;
+    el.style.strokeWidth = HIGHLIGHT_STROKE_WIDTH;
+    // Original SVG uses fill:none on top-level paths; force the fill to win.
+    el.removeAttribute('fill');
+  });
+}
+
+/**
+ * Compute the target's bounding box in the SVG's user coordinate space using
+ * getBoundingClientRect. This avoids all the cross-browser quirks of getBBox
+ * and getCTM on heavily-nested transformed groups — the client rect is just
+ * pixel geometry, and we convert via the SVG's own viewBox-to-pixel ratio.
+ *
+ * Returns null if either rect has zero size (e.g. SVG not yet laid out).
+ */
+function computeViewportBBox(
+  svg: SVGSVGElement,
+  target: SVGGElement,
+): { x: number; y: number; w: number; h: number } | null {
+  const svgRect = svg.getBoundingClientRect();
+  const tRect = target.getBoundingClientRect();
+  if (!svgRect.width || !svgRect.height || !tRect.width || !tRect.height) return null;
+
+  const vb = svg.getAttribute('viewBox')?.split(/[\s,]+/).map(Number);
+  if (!vb || vb.length < 4 || vb.some((n) => !Number.isFinite(n))) return null;
+  const [vx, vy, vw, vh] = vb;
+  const scaleX = svgRect.width / vw;
+  const scaleY = svgRect.height / vh;
+  if (!scaleX || !scaleY) return null;
+
+  return {
+    x: vx + (tRect.left - svgRect.left) / scaleX,
+    y: vy + (tRect.top - svgRect.top) / scaleY,
+    w: tRect.width / scaleX,
+    h: tRect.height / scaleY,
+  };
+}
+
 export default function JapanMapShape({ code }: JapanMapShapeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -36,13 +126,16 @@ export default function JapanMapShape({ code }: JapanMapShapeProps) {
     const container = containerRef.current;
     let cancelled = false;
 
+    const pref = PREFECTURES.find(
+      (p) => normalizeCode(p.code) === normalizeCode(code),
+    );
+    if (!pref) return;
+    const label = romajiToLabel(pref.romaji);
+
     loadSvgText()
       .then((svgText) => {
         if (cancelled || !container) return;
 
-        // Inject the whole map via innerHTML — same proven approach as
-        // <JapanMap />. Then hide every prefecture except the target so only
-        // the chosen shape shows, and zoom the viewBox onto it.
         container.innerHTML = svgText;
         const svg = container.querySelector('svg');
         if (!svg) return;
@@ -50,78 +143,39 @@ export default function JapanMapShape({ code }: JapanMapShapeProps) {
         svg.setAttribute('class', 'japan-shape-svg');
         svg.removeAttribute('width');
         svg.removeAttribute('height');
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
-        const boundary = container.querySelector('.boundary-line');
-        if (boundary) boundary.remove();
+        const target = findTargetGroup(svg, label);
+        if (!target) {
+          container.innerHTML =
+            '<div class="japan-shape-loading">けんが みつかりません</div>';
+          return;
+        }
 
-        const norm = normalizeCode(code);
-        let target: SVGGElement | null = null;
-        const prefs = container.querySelectorAll<SVGGElement>('.prefecture');
-        prefs.forEach((g) => {
-          const c = g.dataset.code;
-          if (!c) return;
-          if (normalizeCode(c) === norm) {
-            target = g;
-            g.querySelectorAll<SVGElement>('path, polygon').forEach((el) => {
-              el.style.fill = HIGHLIGHT_FILL;
-              el.style.stroke = HIGHLIGHT_STROKE;
-              el.style.strokeWidth = '2.5';
-            });
-          } else {
-            g.style.display = 'none';
-          }
-        });
-        if (!target) return;
+        styleHighlight(target);
+        showOnlyTarget(svg, target);
 
-        const refineViewBox = () => {
-          if (cancelled || !target || !svg) return;
-          let bbox: SVGRect;
-          try {
-            bbox = (target as SVGGElement).getBBox();
-          } catch {
-            return;
-          }
-          if (!bbox.width || !bbox.height) return;
-          const ctm = (target as SVGGElement).getCTM();
-          if (!ctm) return;
-
-          // Map all four corners of the bbox through the CTM so any nested
-          // ancestor transforms (the SVG has scale + translate on multiple
-          // parent <g>) are accounted for.
-          const pts = [
-            { x: bbox.x, y: bbox.y },
-            { x: bbox.x + bbox.width, y: bbox.y },
-            { x: bbox.x, y: bbox.y + bbox.height },
-            { x: bbox.x + bbox.width, y: bbox.y + bbox.height },
-          ];
-          const mapped = pts.map((p) => ({
-            x: ctm.a * p.x + ctm.c * p.y + ctm.e,
-            y: ctm.b * p.x + ctm.d * p.y + ctm.f,
-          }));
-          const xs = mapped.map((p) => p.x);
-          const ys = mapped.map((p) => p.y);
-          const minX = Math.min(...xs);
-          const maxX = Math.max(...xs);
-          const minY = Math.min(...ys);
-          const maxY = Math.max(...ys);
-          const w = maxX - minX;
-          const h = maxY - minY;
-          if (w === 0 || h === 0) return;
-          const pad = Math.max(w, h) * 0.1;
+        const refine = () => {
+          if (cancelled) return;
+          const bb = computeViewportBBox(svg, target);
+          if (!bb) return;
+          const pad = Math.max(bb.w, bb.h) * 0.08;
           svg.setAttribute(
             'viewBox',
-            `${minX - pad} ${minY - pad} ${w + pad * 2} ${h + pad * 2}`,
+            `${bb.x - pad} ${bb.y - pad} ${bb.w + pad * 2} ${bb.h + pad * 2}`,
           );
-          svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
         };
 
-        // Run synchronously where possible; rAF as a fallback for browsers
-        // that need a layout tick before getBBox / getCTM are populated.
-        refineViewBox();
-        requestAnimationFrame(refineViewBox);
+        // getBoundingClientRect needs layout. Run on the next frame, and once
+        // more on the frame after that for browsers that haven't realized the
+        // SVG's measurements yet (older WebKit).
+        requestAnimationFrame(() => {
+          refine();
+          requestAnimationFrame(refine);
+        });
       })
       .catch((err) => {
-        console.error('Failed to load Japan map SVG:', err);
+        console.error('Failed to load Japan prefectures SVG:', err);
         if (!cancelled && container) {
           container.innerHTML =
             '<div class="japan-shape-loading">よみこみエラー</div>';
