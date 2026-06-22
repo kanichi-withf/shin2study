@@ -2,7 +2,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   padding: 80px 24px 48px;
-  max-width: 800px;
+  max-width: clamp(720px, 80vw, 960px);
   margin: 0 auto;
   font-family: var(--font-japanese);
   color: var(--text-primary);

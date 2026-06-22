@@ -1,7 +1,7 @@
 .japan-map-container {
   width: 100%;
   max-width: 560px;
-  min-height: 460px;
+  min-height: clamp(320px, 45vh, 500px);
   margin: 0 auto;
   position: relative;
   display: flex;
@@ -31,11 +31,10 @@
   width: 100%;
   height: auto;
   /* Explicit min-height keeps the SVG visible on older Safari that ignores
-     the intrinsic aspect ratio from a viewBox-only SVG (no width/height
-     attributes). max-height bumped up so the map isn't squished vertically
-     on smaller screens. */
-  min-height: 440px;
-  max-height: 80vh;
+     the intrinsic aspect ratio from a viewBox-only SVG. Use clamp() so the
+     map shrinks gracefully on short viewports (iPad landscape ~754h). */
+  min-height: clamp(300px, 45vh, 480px);
+  max-height: min(72vh, 540px);
   display: block;
 }
 
@@ -51,17 +50,17 @@
   50%      { stroke-width: 5px !important; }
 }
 
-/* Responsive */
+/* Phone portrait (most kids' phone): keep the map prominent. */
 @media (max-width: 768px) {
   .japan-map-container {
     max-width: 100%;
-    min-height: 500px;
+    min-height: clamp(360px, 50vh, 520px);
     padding: 8px;
   }
 
   .japan-map-svg {
-    min-height: 480px;
-    max-height: 75vh;
+    min-height: clamp(340px, 48vh, 480px);
+    max-height: 70vh;
   }
 }
 

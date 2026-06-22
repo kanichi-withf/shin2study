@@ -1,6 +1,6 @@
-/* Reduce the parent .quiz-map height for the shape variant — the single
-   prefecture doesn't need the full Japan map's vertical space, and the
-   bigger reservation made the area visually collide with the question text. */
+/* Override the parent .quiz-map reservation: a single prefecture doesn't
+   need the full map's vertical room, and the bigger reservation made the
+   area visually collide with the question text. */
 .quiz-map--shape {
   min-height: 0;
 }
@@ -8,7 +8,7 @@
 .japan-shape-container {
   width: 100%;
   max-width: 480px;
-  min-height: 420px;
+  min-height: clamp(300px, 45vh, 440px);
   margin: 0 auto;
   position: relative;
   display: flex;
@@ -32,20 +32,20 @@
 .japan-shape-svg {
   width: 100%;
   height: auto;
-  min-height: 420px;
-  max-height: 70vh;
+  min-height: clamp(280px, 42vh, 420px);
+  max-height: min(68vh, 460px);
   display: block;
 }
 
 @media (max-width: 768px) {
   .japan-shape-container {
     max-width: 100%;
-    min-height: 440px;
+    min-height: clamp(320px, 48vh, 460px);
     padding: 12px;
   }
 
   .japan-shape-svg {
-    min-height: 420px;
-    max-height: 65vh;
+    min-height: clamp(300px, 45vh, 440px);
+    max-height: 63vh;
   }
 }
