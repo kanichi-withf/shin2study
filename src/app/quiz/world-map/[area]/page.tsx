@@ -134,7 +134,7 @@ function Inner({ area }: { area: AreaId }) {
 
   const [state, setState] = useState<QuizState>(READY_STATE);
   const [timeLimit, setTimeLimit] = useState(
-    Number.isFinite(tFromUrl) ? tFromUrl : 10,
+    Number.isFinite(tFromUrl) ? tFromUrl : 0,
   );
   const [totalQuestions, setTotalQuestions] = useState(
     Number.isFinite(qFromUrl) && qFromUrl > 0
