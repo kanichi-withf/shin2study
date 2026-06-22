@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState, useCallback, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import TimeBar from '@/components/TimeBar';
@@ -10,7 +11,11 @@ import QuizStartOptions from '@/components/QuizStartOptions';
 import { useAuth } from '@/components/AuthProvider';
 import type { AttemptQuestion } from '@/lib/quiz-store';
 import { PREFECTURES, type PrefectureData } from '@/data/japan-map-data';
-import { SPECIALTIES, type SpecialtyData } from '@/data/japan-specialty-data';
+import {
+  SPECIALTIES,
+  CATEGORY_LABELS,
+  type SpecialtyData,
+} from '@/data/japan-specialty-data';
 import '../japan-map/japan-map-quiz.css';
 
 type GamePhase = 'ready' | 'playing' | 'feedback' | 'result';
@@ -303,9 +308,24 @@ function Inner() {
           </p>
           {state.currentSpecialty && (
             <div className="specialty-card">
-              <span className="specialty-card__emoji" aria-hidden>
-                {state.currentSpecialty.emoji}
+              <span className="specialty-card__category">
+                {CATEGORY_LABELS[state.currentSpecialty.category]}
               </span>
+              {state.currentSpecialty.imageUrl ? (
+                <Image
+                  className="specialty-card__image"
+                  src={state.currentSpecialty.imageUrl}
+                  alt={state.currentSpecialty.name}
+                  width={320}
+                  height={240}
+                  sizes="(max-width: 480px) 200px, 320px"
+                  priority
+                />
+              ) : (
+                <span className="specialty-card__emoji" aria-hidden>
+                  {state.currentSpecialty.emoji}
+                </span>
+              )}
               <span className="specialty-card__name">
                 {state.currentSpecialty.name}
               </span>
@@ -362,6 +382,9 @@ function Inner() {
                     <span className="quiz-modal__answer-name">
                       {p.kana}（{p.name}）
                     </span>
+                    {sp.hint && (
+                      <span className="quiz-modal__hint">💡 {sp.hint}</span>
+                    )}
                   </div>
                   <button
                     type="button"

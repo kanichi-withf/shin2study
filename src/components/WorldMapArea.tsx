@@ -57,16 +57,78 @@ interface Rect { x: number; y: number; w: number; h: number }
  * coordinates, using getBoundingClientRect → viewBox conversion. This avoids
  * the cross-browser quirks of getBBox/getCTM seen on heavily-transformed maps.
  */
-function computeAreaBBox(svg: SVGSVGElement, area: AreaId): Rect | null {
-  const svgRect = svg.getBoundingClientRect();
-  if (!svgRect.width || !svgRect.height) return null;
-  const vb = svg.getAttribute('viewBox')?.split(/[\s,]+/).map(Number);
-  if (!vb || vb.length < 4) return null;
-  const [vx, vy, vw, vh] = vb;
-  const scaleX = svgRect.width / vw;
-  const scaleY = svgRect.height / vh;
-  if (!scaleX || !scaleY) return null;
+function computeSvgBBox(
+  svg: SVGSVGElement,
+  target: SVGGraphicsElement,
+): { x: number; y: number; w: number; h: number } | null {
+  try {
+    const paths =
+      target.tagName.toLowerCase() === 'g'
+        ? Array.from(target.querySelectorAll<SVGGraphicsElement>('path, polygon'))
+        : [target];
 
+    if (paths.length === 0) return null;
+
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    let found = false;
+
+    for (const p of paths) {
+      const bbox = p.getBBox();
+      if (!bbox.width && !bbox.height) continue;
+
+      let matrix = new DOMMatrix();
+      let cur: Element | null = p;
+      while (cur && cur instanceof SVGGraphicsElement && cur !== svg) {
+        const transformList = cur.transform.baseVal;
+        if (transformList && transformList.numberOfItems > 0) {
+          const consolidated = transformList.consolidate();
+          if (consolidated) {
+            matrix = consolidated.matrix.multiply(matrix);
+          }
+        }
+        cur = cur.parentElement;
+      }
+
+      const p1 = new DOMPoint(bbox.x, bbox.y);
+      const p2 = new DOMPoint(bbox.x + bbox.width, bbox.y);
+      const p3 = new DOMPoint(bbox.x, bbox.y + bbox.height);
+      const p4 = new DOMPoint(bbox.x + bbox.width, bbox.y + bbox.height);
+
+      const pt1 = p1.matrixTransform(matrix);
+      const pt2 = p2.matrixTransform(matrix);
+      const pt3 = p3.matrixTransform(matrix);
+      const pt4 = p4.matrixTransform(matrix);
+
+      const pMinX = Math.min(pt1.x, pt2.x, pt3.x, pt4.x);
+      const pMaxX = Math.max(pt1.x, pt2.x, pt3.x, pt4.x);
+      const pMinY = Math.min(pt1.y, pt2.y, pt3.y, pt4.y);
+      const pMaxY = Math.max(pt1.y, pt2.y, pt3.y, pt4.y);
+
+      found = true;
+      if (pMinX < minX) minX = pMinX;
+      if (pMinY < minY) minY = pMinY;
+      if (pMaxX > maxX) maxX = pMaxX;
+      if (pMaxY > maxY) maxY = pMaxY;
+    }
+
+    if (!found) return null;
+
+    return {
+      x: minX,
+      y: minY,
+      w: maxX - minX,
+      h: maxY - minY,
+    };
+  } catch (e) {
+    console.error('Failed to compute SVG bbox:', e);
+    return null;
+  }
+}
+
+function computeAreaBBox(svg: SVGSVGElement, area: AreaId): Rect | null {
   let minX = Infinity;
   let maxX = -Infinity;
   let minY = Infinity;
@@ -76,17 +138,13 @@ function computeAreaBBox(svg: SVGSVGElement, area: AreaId): Rect | null {
   for (const country of getCountriesInArea(area)) {
     const el = findCountryElement(svg, country.code);
     if (!el) continue;
-    const r = el.getBoundingClientRect();
-    if (!r.width || !r.height) continue;
+    const r = computeSvgBBox(svg, el);
+    if (!r) continue;
     found = true;
-    const x = vx + (r.left - svgRect.left) / scaleX;
-    const y = vy + (r.top - svgRect.top) / scaleY;
-    const w = r.width / scaleX;
-    const h = r.height / scaleY;
-    if (x < minX) minX = x;
-    if (y < minY) minY = y;
-    if (x + w > maxX) maxX = x + w;
-    if (y + h > maxY) maxY = y + h;
+    if (r.x < minX) minX = r.x;
+    if (r.y < minY) minY = r.y;
+    if (r.x + r.w > maxX) maxX = r.x + r.w;
+    if (r.y + r.h > maxY) maxY = r.y + r.h;
   }
 
   if (!found) return null;
@@ -124,17 +182,22 @@ export default function WorldMapArea({
       let fill = NON_AREA_FILL;
       let stroke = DEFAULT_STROKE;
       let strokeWidth = '0.5';
+      let fillOpacity = '';
       if (isHighlight) {
         fill = HIGHLIGHT_FILL;
         stroke = HIGHLIGHT_STROKE;
         strokeWidth = '1.2';
+        fillOpacity = '1';
       } else if (isAnswered) {
         fill = ANSWERED_FILL;
+        fillOpacity = '1';
       } else if (inArea) {
         fill = DEFAULT_FILL;
+        fillOpacity = '1';
       }
       paths.forEach((p) => {
         p.style.fill = fill;
+        p.style.fillOpacity = fillOpacity;
         p.style.stroke = stroke;
         p.style.strokeWidth = strokeWidth;
         // Keep stroke at a constant screen px even when the viewBox is
@@ -212,10 +275,7 @@ export default function WorldMapArea({
             `${bb.x - pad} ${bb.y - pad} ${bb.w + pad * 2} ${bb.h + pad * 2}`,
           );
         };
-        requestAnimationFrame(() => {
-          refine();
-          requestAnimationFrame(refine);
-        });
+        refine();
       })
       .catch((err) => console.error('Failed to load world-map.svg:', err));
     // Mount-only: we deliberately ignore `area` here because the mount logic

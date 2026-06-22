@@ -70,31 +70,82 @@ function styleHighlight(target: SVGGraphicsElement) {
       : ([target] as unknown as NodeListOf<SVGElement>);
   paths.forEach((p) => {
     p.style.fill = HIGHLIGHT_FILL;
+    p.style.fillOpacity = '1';
     p.style.stroke = HIGHLIGHT_STROKE;
     p.style.strokeWidth = HIGHLIGHT_STROKE_WIDTH;
     p.setAttribute('vector-effect', 'non-scaling-stroke');
   });
 }
 
-function computeViewportBBox(
+function computeSvgBBox(
   svg: SVGSVGElement,
   target: SVGGraphicsElement,
 ): { x: number; y: number; w: number; h: number } | null {
-  const svgRect = svg.getBoundingClientRect();
-  const tRect = target.getBoundingClientRect();
-  if (!svgRect.width || !svgRect.height || !tRect.width || !tRect.height) return null;
-  const vb = svg.getAttribute('viewBox')?.split(/[\s,]+/).map(Number);
-  if (!vb || vb.length < 4 || vb.some((n) => !Number.isFinite(n))) return null;
-  const [vx, vy, vw, vh] = vb;
-  const scaleX = svgRect.width / vw;
-  const scaleY = svgRect.height / vh;
-  if (!scaleX || !scaleY) return null;
-  return {
-    x: vx + (tRect.left - svgRect.left) / scaleX,
-    y: vy + (tRect.top - svgRect.top) / scaleY,
-    w: tRect.width / scaleX,
-    h: tRect.height / scaleY,
-  };
+  try {
+    const paths =
+      target.tagName.toLowerCase() === 'g'
+        ? Array.from(target.querySelectorAll<SVGGraphicsElement>('path, polygon'))
+        : [target];
+
+    if (paths.length === 0) return null;
+
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    let found = false;
+
+    for (const p of paths) {
+      const bbox = p.getBBox();
+      if (!bbox.width && !bbox.height) continue;
+
+      let matrix = new DOMMatrix();
+      let cur: Element | null = p;
+      while (cur && cur instanceof SVGGraphicsElement && cur !== svg) {
+        const transformList = cur.transform.baseVal;
+        if (transformList && transformList.numberOfItems > 0) {
+          const consolidated = transformList.consolidate();
+          if (consolidated) {
+            matrix = consolidated.matrix.multiply(matrix);
+          }
+        }
+        cur = cur.parentElement;
+      }
+
+      const p1 = new DOMPoint(bbox.x, bbox.y);
+      const p2 = new DOMPoint(bbox.x + bbox.width, bbox.y);
+      const p3 = new DOMPoint(bbox.x, bbox.y + bbox.height);
+      const p4 = new DOMPoint(bbox.x + bbox.width, bbox.y + bbox.height);
+
+      const pt1 = p1.matrixTransform(matrix);
+      const pt2 = p2.matrixTransform(matrix);
+      const pt3 = p3.matrixTransform(matrix);
+      const pt4 = p4.matrixTransform(matrix);
+
+      const pMinX = Math.min(pt1.x, pt2.x, pt3.x, pt4.x);
+      const pMaxX = Math.max(pt1.x, pt2.x, pt3.x, pt4.x);
+      const pMinY = Math.min(pt1.y, pt2.y, pt3.y, pt4.y);
+      const pMaxY = Math.max(pt1.y, pt2.y, pt3.y, pt4.y);
+
+      found = true;
+      if (pMinX < minX) minX = pMinX;
+      if (pMinY < minY) minY = pMinY;
+      if (pMaxX > maxX) maxX = pMaxX;
+      if (pMaxY > maxY) maxY = pMaxY;
+    }
+
+    if (!found) return null;
+
+    return {
+      x: minX,
+      y: minY,
+      w: maxX - minX,
+      h: maxY - minY,
+    };
+  } catch (e) {
+    console.error('Failed to compute SVG bbox:', e);
+    return null;
+  }
 }
 
 export default function WorldCountryShape({ code }: WorldCountryShapeProps) {
@@ -130,7 +181,7 @@ export default function WorldCountryShape({ code }: WorldCountryShapeProps) {
 
         const refine = () => {
           if (cancelled) return;
-          const bb = computeViewportBBox(svg, target);
+          const bb = computeSvgBBox(svg, target);
           if (!bb) return;
           // Slightly larger padding than the prefecture shape — small island
           // countries look cramped without room to breathe.
@@ -141,10 +192,7 @@ export default function WorldCountryShape({ code }: WorldCountryShapeProps) {
           );
         };
 
-        requestAnimationFrame(() => {
-          refine();
-          requestAnimationFrame(refine);
-        });
+        refine();
       })
       .catch((err) => {
         console.error('Failed to load world-map.svg:', err);

@@ -456,14 +456,15 @@
 
 /* --- Specialty card (めいさんひんクイズ用) --- */
 .specialty-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
   min-height: clamp(280px, 40vh, 480px);
-  padding: 24px 16px;
+  padding: 32px 16px 24px;
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 217, 61, 0.22), transparent 65%),
     linear-gradient(180deg, #FFFDF7 0%, #FFF6E0 100%);
@@ -471,10 +472,35 @@
   border-radius: var(--radius-md);
 }
 
+.specialty-card__category {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-family: var(--font-japanese);
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(92, 77, 74, 0.25);
+  border-radius: 12px;
+  padding: 3px 10px;
+  letter-spacing: 0.04em;
+}
+
 .specialty-card__emoji {
-  font-size: clamp(7rem, 22vw, 11rem);
+  font-size: clamp(6rem, 20vw, 10rem);
   line-height: 1;
   filter: drop-shadow(0 6px 0 rgba(92, 77, 74, 0.18));
+}
+
+.specialty-card__image {
+  width: clamp(180px, 36vw, 320px);
+  height: clamp(180px, 36vw, 320px);
+  object-fit: contain;
+  background: #FFF;
+  border: 3px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: 0 4px 0 var(--border-color);
 }
 
 .specialty-card__name {
@@ -484,6 +510,20 @@
   color: var(--text-primary);
   text-shadow: 0 2px 0 rgba(92, 77, 74, 0.12);
   letter-spacing: 0.04em;
+}
+
+.quiz-modal__hint {
+  display: block;
+  margin-top: 14px;
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text-primary);
+  background: rgba(255, 217, 61, 0.25);
+  border: 2px dashed rgba(92, 77, 74, 0.3);
+  border-radius: 12px;
+  text-align: left;
 }
 
 /* --- Choices container --- */

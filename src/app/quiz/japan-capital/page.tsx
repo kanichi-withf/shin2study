@@ -292,7 +292,7 @@ function Inner() {
               onTimeUp={handleTimeUp}
             />
           </div>
-          <p className="quiz-question__text">この けんの しょざいちは？</p>
+          <p className="quiz-question__text">ここの けんちょうしょざいちは？</p>
           <div className="quiz-map">
             <JapanMap
               highlightedCode={state.currentPrefecture?.code ?? null}

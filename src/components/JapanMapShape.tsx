@@ -80,6 +80,7 @@ function showOnlyTarget(svg: SVGSVGElement, target: SVGGElement) {
 function styleHighlight(target: SVGGElement) {
   target.querySelectorAll<SVGElement>('path, polygon, polyline').forEach((el) => {
     el.style.fill = HIGHLIGHT_FILL;
+    el.style.fillOpacity = '1';
     el.style.stroke = HIGHLIGHT_STROKE;
     el.style.strokeWidth = HIGHLIGHT_STROKE_WIDTH;
     // Original SVG uses fill:none on top-level paths; force the fill to win.
@@ -95,27 +96,76 @@ function styleHighlight(target: SVGGElement) {
  *
  * Returns null if either rect has zero size (e.g. SVG not yet laid out).
  */
-function computeViewportBBox(
+function computeSvgBBox(
   svg: SVGSVGElement,
   target: SVGGElement,
 ): { x: number; y: number; w: number; h: number } | null {
-  const svgRect = svg.getBoundingClientRect();
-  const tRect = target.getBoundingClientRect();
-  if (!svgRect.width || !svgRect.height || !tRect.width || !tRect.height) return null;
+  try {
+    const paths = Array.from(target.querySelectorAll<SVGGraphicsElement>('path, polygon, polyline'));
+    if (paths.length === 0) return null;
 
-  const vb = svg.getAttribute('viewBox')?.split(/[\s,]+/).map(Number);
-  if (!vb || vb.length < 4 || vb.some((n) => !Number.isFinite(n))) return null;
-  const [vx, vy, vw, vh] = vb;
-  const scaleX = svgRect.width / vw;
-  const scaleY = svgRect.height / vh;
-  if (!scaleX || !scaleY) return null;
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    let found = false;
 
-  return {
-    x: vx + (tRect.left - svgRect.left) / scaleX,
-    y: vy + (tRect.top - svgRect.top) / scaleY,
-    w: tRect.width / scaleX,
-    h: tRect.height / scaleY,
-  };
+    for (const p of paths) {
+      const bbox = p.getBBox();
+      if (!bbox.width && !bbox.height) continue;
+
+      let matrix = new DOMMatrix();
+      let cur: Element | null = p;
+      while (cur && cur instanceof SVGGraphicsElement && cur !== svg) {
+        const transformList = cur.transform.baseVal;
+        if (transformList && transformList.numberOfItems > 0) {
+          const consolidated = transformList.consolidate();
+          if (consolidated) {
+            // consolidated.matrix is an SVGMatrix; SVGMatrix.multiply only accepts
+            // another SVGMatrix (Chromium), so convert to DOMMatrix and use
+            // DOMMatrix.multiply, which accepts a DOMMatrix cross-browser.
+            const m = consolidated.matrix;
+            const domMatrix = new DOMMatrix([m.a, m.b, m.c, m.d, m.e, m.f]);
+            matrix = domMatrix.multiply(matrix);
+          }
+        }
+        cur = cur.parentElement;
+      }
+
+      const p1 = new DOMPoint(bbox.x, bbox.y);
+      const p2 = new DOMPoint(bbox.x + bbox.width, bbox.y);
+      const p3 = new DOMPoint(bbox.x, bbox.y + bbox.height);
+      const p4 = new DOMPoint(bbox.x + bbox.width, bbox.y + bbox.height);
+
+      const pt1 = p1.matrixTransform(matrix);
+      const pt2 = p2.matrixTransform(matrix);
+      const pt3 = p3.matrixTransform(matrix);
+      const pt4 = p4.matrixTransform(matrix);
+
+      const pMinX = Math.min(pt1.x, pt2.x, pt3.x, pt4.x);
+      const pMaxX = Math.max(pt1.x, pt2.x, pt3.x, pt4.x);
+      const pMinY = Math.min(pt1.y, pt2.y, pt3.y, pt4.y);
+      const pMaxY = Math.max(pt1.y, pt2.y, pt3.y, pt4.y);
+
+      found = true;
+      if (pMinX < minX) minX = pMinX;
+      if (pMinY < minY) minY = pMinY;
+      if (pMaxX > maxX) maxX = pMaxX;
+      if (pMaxY > maxY) maxY = pMaxY;
+    }
+
+    if (!found) return null;
+
+    return {
+      x: minX,
+      y: minY,
+      w: maxX - minX,
+      h: maxY - minY,
+    };
+  } catch (e) {
+    console.error('Failed to compute SVG bbox:', e);
+    return null;
+  }
 }
 
 export default function JapanMapShape({ code }: JapanMapShapeProps) {
@@ -157,7 +207,7 @@ export default function JapanMapShape({ code }: JapanMapShapeProps) {
 
         const refine = () => {
           if (cancelled) return;
-          const bb = computeViewportBBox(svg, target);
+          const bb = computeSvgBBox(svg, target);
           if (!bb) return;
           const pad = Math.max(bb.w, bb.h) * 0.08;
           svg.setAttribute(
@@ -166,13 +216,7 @@ export default function JapanMapShape({ code }: JapanMapShapeProps) {
           );
         };
 
-        // getBoundingClientRect needs layout. Run on the next frame, and once
-        // more on the frame after that for browsers that haven't realized the
-        // SVG's measurements yet (older WebKit).
-        requestAnimationFrame(() => {
-          refine();
-          requestAnimationFrame(refine);
-        });
+        refine();
       })
       .catch((err) => {
         console.error('Failed to load Japan prefectures SVG:', err);
