@@ -1,95 +1,128 @@
 import Link from 'next/link';
 import './home.css';
 
-const quizzes = [
+type Category = {
+  id: string;
+  title: string;
+  subtitle: string;
+  emoji: string;
+  color: string;
+};
+
+type Quiz = {
+  id: string;
+  category: string;
+  title: string;
+  subtitle: string;
+  emoji: string;
+  href: string;
+  available: boolean;
+};
+
+const categories: Category[] = [
+  {
+    id: 'japan',
+    title: 'にほん',
+    subtitle: 'にほんの クイズ',
+    emoji: '🗾',
+    color: '#FF9F43',
+  },
+  {
+    id: 'world',
+    title: 'せかい',
+    subtitle: 'せかいの クイズ',
+    emoji: '🌎',
+    color: '#4D96FF',
+  },
+  {
+    id: 'others',
+    title: 'そのほか',
+    subtitle: 'いろんな クイズ',
+    emoji: '🌈',
+    color: '#A55EEA',
+  },
+];
+
+const quizzes: Quiz[] = [
   {
     id: 'japan-map',
+    category: 'japan',
     title: 'にほんちず',
-    subtitle: '日本地図クイズ',
+    subtitle: '都道府県',
     emoji: '🗾',
-    description: 'けんのなまえをあてよう！',
     href: '/quiz/japan-map',
-    gradient: 'linear-gradient(135deg, #FF9F43, #FFD93D)',
     available: true,
   },
   {
     id: 'japan-capital',
-    title: 'けんちょうしょざいち',
-    subtitle: '県庁所在地クイズ',
+    category: 'japan',
+    title: 'けんちょう',
+    subtitle: '県庁所在地',
     emoji: '🏛️',
-    description: 'けんちょうしょざいちを あてよう！',
     href: '/quiz/japan-capital',
-    gradient: 'linear-gradient(135deg, #FF85A1, #FFD93D)',
     available: true,
   },
   {
     id: 'japan-shape',
+    category: 'japan',
     title: 'けんのかたち',
-    subtitle: '都道府県の形クイズ',
+    subtitle: '都道府県の形',
     emoji: '🧩',
-    description: 'かたちだけで けんを あてよう！',
     href: '/quiz/japan-shape',
-    gradient: 'linear-gradient(135deg, #6BCB77, #4D96FF)',
     available: true,
   },
   {
     id: 'world-map',
+    category: 'world',
     title: 'せかいちず',
-    subtitle: '世界地図クイズ',
+    subtitle: '世界の国',
     emoji: '🌎',
-    description: 'せかいのくにをあてよう！',
     href: '/quiz/world-map',
-    gradient: 'linear-gradient(135deg, #8E2DE2, #4A00E0)',
     available: true,
   },
   {
     id: 'world-capital',
-    title: 'せかいのしゅと',
-    subtitle: '世界の首都クイズ',
+    category: 'world',
+    title: 'しゅと',
+    subtitle: '世界の首都',
     emoji: '🏙️',
-    description: 'くにのしゅとをあてよう！',
     href: '/quiz/world-capital',
-    gradient: 'linear-gradient(135deg, #4D96FF, #6BCB77)',
     available: true,
   },
   {
     id: 'world-shape',
+    category: 'world',
     title: 'くにのかたち',
-    subtitle: '国の形クイズ',
+    subtitle: '国の形',
     emoji: '🧩',
-    description: 'かたちだけで くにを あてよう！',
     href: '/quiz/world-shape',
-    gradient: 'linear-gradient(135deg, #A55EEA, #FF9F43)',
     available: true,
   },
   {
     id: 'animals',
+    category: 'others',
     title: 'どうぶつ',
-    subtitle: '動物クイズ',
+    subtitle: '動物',
     emoji: '🦁',
-    description: 'どうぶつのなまえをおぼえよう！',
     href: '/quiz/animals',
-    gradient: 'linear-gradient(135deg, #FF7675, #FF85A1)',
     available: false,
   },
   {
     id: 'numbers',
+    category: 'others',
     title: 'すうじ',
-    subtitle: '数字クイズ',
+    subtitle: '数字',
     emoji: '🔢',
-    description: 'すうじをかぞえよう！',
     href: '/quiz/numbers',
-    gradient: 'linear-gradient(135deg, #4D96FF, #85B5FF)',
     available: false,
   },
   {
     id: 'colors',
+    category: 'others',
     title: 'いろ',
-    subtitle: '色クイズ',
+    subtitle: '色',
     emoji: '🌈',
-    description: 'いろのなまえをおぼえよう！',
     href: '/quiz/colors',
-    gradient: 'linear-gradient(135deg, #6BCB77, #9DFFAC)',
     available: false,
   },
 ];
@@ -97,49 +130,63 @@ const quizzes = [
 export default function Home() {
   return (
     <main className="home">
-      <div className="home__header">
-        <div className="home__logo-area">
-          <span className="home__logo-emoji">📚</span>
-          <h1 className="home__title">
-            <span className="home__title-shin">しん²</span>
-            <span className="home__title-study">スタディ</span>
-          </h1>
-        </div>
-        <p className="home__subtitle">たのしく まなぼう！</p>
-      </div>
+      <header className="home__hero">
+        <span className="home__hero-logo" aria-hidden>📚</span>
+        <h1 className="home__hero-title">
+          <span className="home__hero-shin">しん²</span>
+          <span className="home__hero-study">スタディ</span>
+        </h1>
+        <p className="home__hero-tagline">たのしく まなぼう！</p>
+      </header>
 
-      <div className="home__grid">
-        {quizzes.map((quiz, index) => (
-          <div
-            key={quiz.id}
-            className="home__card-wrapper"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            {quiz.available ? (
-              <Link href={quiz.href} className="home__card home__card--active" id={`quiz-${quiz.id}`}>
-                <div className="home__card-bg" style={{ background: quiz.gradient }} />
-                <div className="home__card-content">
-                  <span className="home__card-emoji">{quiz.emoji}</span>
-                  <h2 className="home__card-title">{quiz.title}</h2>
-                  <p className="home__card-subtitle">{quiz.subtitle}</p>
-                  <p className="home__card-desc">{quiz.description}</p>
+      <div className="home__sections">
+        {categories.map((cat) => {
+          const items = quizzes.filter((q) => q.category === cat.id);
+          if (items.length === 0) return null;
+          return (
+            <section
+              key={cat.id}
+              className="cat"
+              style={{ '--cat-color': cat.color } as React.CSSProperties}
+            >
+              <header className="cat__head">
+                <span className="cat__head-emoji" aria-hidden>{cat.emoji}</span>
+                <div className="cat__head-text">
+                  <h2 className="cat__head-title">{cat.title}</h2>
+                  <p className="cat__head-sub">{cat.subtitle}</p>
                 </div>
-                <div className="home__card-arrow">▶</div>
-              </Link>
-            ) : (
-              <div className="home__card home__card--locked" id={`quiz-${quiz.id}`}>
-                <div className="home__card-bg" style={{ background: quiz.gradient, opacity: 0.3 }} />
-                <div className="home__card-content">
-                  <span className="home__card-emoji">{quiz.emoji}</span>
-                  <h2 className="home__card-title">{quiz.title}</h2>
-                  <p className="home__card-subtitle">{quiz.subtitle}</p>
-                  <p className="home__card-desc">{quiz.description}</p>
-                </div>
-                <div className="home__card-badge">🔜 じゅんびちゅう</div>
-              </div>
-            )}
-          </div>
-        ))}
+                <span className="cat__head-count" aria-label={`${items.length}このクイズ`}>
+                  {items.length}
+                </span>
+              </header>
+
+              <ul className="cat__grid">
+                {items.map((quiz) => (
+                  <li key={quiz.id} className="cat__grid-item">
+                    {quiz.available ? (
+                      <Link href={quiz.href} className="tile" id={`quiz-${quiz.id}`}>
+                        <span className="tile__emoji" aria-hidden>{quiz.emoji}</span>
+                        <span className="tile__title">{quiz.title}</span>
+                        <span className="tile__sub">{quiz.subtitle}</span>
+                      </Link>
+                    ) : (
+                      <div
+                        className="tile tile--locked"
+                        id={`quiz-${quiz.id}`}
+                        aria-disabled
+                      >
+                        <span className="tile__emoji" aria-hidden>{quiz.emoji}</span>
+                        <span className="tile__title">{quiz.title}</span>
+                        <span className="tile__sub">{quiz.subtitle}</span>
+                        <span className="tile__lock" aria-label="じゅんびちゅう">🔒</span>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
       </div>
 
       <footer className="home__footer">

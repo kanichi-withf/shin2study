@@ -9,7 +9,10 @@ interface WorldCountryShapeProps {
 
 const HIGHLIGHT_FILL = '#FFD93D';
 const HIGHLIGHT_STROKE = '#FF9F43';
-const HIGHLIGHT_STROKE_WIDTH = '1.5';
+// Vector-effect: non-scaling-stroke locks the stroke to screen pixels so it
+// stays the same width regardless of how far we zoom into a small country.
+// 1.2px reads cleanly on both phone and iPad without overwhelming the shape.
+const HIGHLIGHT_STROKE_WIDTH = '1.2';
 
 let svgTextPromise: Promise<string> | null = null;
 function loadSvgText(): Promise<string> {
@@ -69,6 +72,7 @@ function styleHighlight(target: SVGGraphicsElement) {
     p.style.fill = HIGHLIGHT_FILL;
     p.style.stroke = HIGHLIGHT_STROKE;
     p.style.strokeWidth = HIGHLIGHT_STROKE_WIDTH;
+    p.setAttribute('vector-effect', 'non-scaling-stroke');
   });
 }
 

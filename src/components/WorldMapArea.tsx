@@ -123,11 +123,11 @@ export default function WorldMapArea({
 
       let fill = NON_AREA_FILL;
       let stroke = DEFAULT_STROKE;
-      let strokeWidth = '0.7';
+      let strokeWidth = '0.5';
       if (isHighlight) {
         fill = HIGHLIGHT_FILL;
         stroke = HIGHLIGHT_STROKE;
-        strokeWidth = '1.5';
+        strokeWidth = '1.2';
       } else if (isAnswered) {
         fill = ANSWERED_FILL;
       } else if (inArea) {
@@ -137,6 +137,9 @@ export default function WorldMapArea({
         p.style.fill = fill;
         p.style.stroke = stroke;
         p.style.strokeWidth = strokeWidth;
+        // Keep stroke at a constant screen px even when the viewBox is
+        // zoomed in onto a smaller continent / country.
+        p.setAttribute('vector-effect', 'non-scaling-stroke');
       });
     }
   }, [area, highlightedCode, answeredCodes]);
@@ -186,7 +189,8 @@ export default function WorldMapArea({
           .forEach((el) => {
             el.style.fill = NON_AREA_FILL;
             el.style.stroke = DEFAULT_STROKE;
-            el.style.strokeWidth = '0.7';
+            el.style.strokeWidth = '0.5';
+            el.setAttribute('vector-effect', 'non-scaling-stroke');
           });
 
         applyStylesRef.current();
