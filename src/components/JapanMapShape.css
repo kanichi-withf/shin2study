@@ -22,6 +22,14 @@
   box-sizing: border-box;
 }
 
+/* ハードモード：県の形の50%を隠す不透明カバー（枠の背景色と同じ） */
+.japan-shape-mask {
+  position: absolute;
+  background: #FFFDF7;
+  z-index: 2;
+  pointer-events: none;
+}
+
 .japan-shape-loading {
   font-size: 1.2rem;
   color: var(--text-secondary);

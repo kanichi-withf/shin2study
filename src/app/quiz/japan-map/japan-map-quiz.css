@@ -439,6 +439,14 @@
   letter-spacing: 0.02em;
 }
 
+.quiz-question__badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #FF6B35;
+}
+
 /* --- Map (inside question section) ---
    `clamp()` keeps the map area visible across the full range of viewports:
    - small phones (700h ~) get ~360px so the map stays usable

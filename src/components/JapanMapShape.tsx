@@ -4,8 +4,14 @@ import { useEffect, useRef } from 'react';
 import { PREFECTURES } from '@/data/japan-map-data';
 import './JapanMapShape.css';
 
+type HiddenSide = 'top' | 'bottom' | 'left' | 'right' | null;
+
 interface JapanMapShapeProps {
   code: string | null;
+  /** ハードモード：県の形を傾ける角度（度）。0で無効。 */
+  rotation?: number;
+  /** ハードモード：この側の50%を隠す。nullで無効。 */
+  hiddenSide?: HiddenSide;
 }
 
 const HIGHLIGHT_FILL = '#FFD93D';
@@ -168,7 +174,11 @@ function computeSvgBBox(
   }
 }
 
-export default function JapanMapShape({ code }: JapanMapShapeProps) {
+export default function JapanMapShape({
+  code,
+  rotation = 0,
+  hiddenSide = null,
+}: JapanMapShapeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -217,6 +227,33 @@ export default function JapanMapShape({ code }: JapanMapShapeProps) {
         };
 
         refine();
+
+        // ── ハードモード演出 ───────────────────────────────
+        const hard = rotation !== 0 || hiddenSide !== null;
+        // はみ出し・マスクが角丸の外に出ないようにクリップ
+        container.style.overflow = hard ? 'hidden' : '';
+
+        // 県の形だけをランダムに傾ける（少し縮小して枠内に収める）
+        if (rotation) {
+          svg.style.transformOrigin = 'center';
+          svg.style.transform = `rotate(${rotation}deg) scale(0.82)`;
+        }
+
+        // 形の50%を隠す（ランダムな側を不透明カバーで覆う）
+        if (hiddenSide) {
+          const mask = document.createElement('div');
+          mask.className = 'japan-shape-mask';
+          if (hiddenSide === 'top') {
+            mask.style.cssText = 'top:0;left:0;right:0;height:50%;';
+          } else if (hiddenSide === 'bottom') {
+            mask.style.cssText = 'bottom:0;left:0;right:0;height:50%;';
+          } else if (hiddenSide === 'left') {
+            mask.style.cssText = 'top:0;bottom:0;left:0;width:50%;';
+          } else {
+            mask.style.cssText = 'top:0;bottom:0;right:0;width:50%;';
+          }
+          container.appendChild(mask);
+        }
       })
       .catch((err) => {
         console.error('Failed to load Japan prefectures SVG:', err);
@@ -229,7 +266,7 @@ export default function JapanMapShape({ code }: JapanMapShapeProps) {
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [code, rotation, hiddenSide]);
 
   return (
     <div

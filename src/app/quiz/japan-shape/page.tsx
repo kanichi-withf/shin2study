@@ -14,6 +14,11 @@ import { PREFECTURES, PrefectureData } from '@/data/japan-map-data';
 import '../japan-map/japan-map-quiz.css';
 
 type GamePhase = 'ready' | 'playing' | 'feedback' | 'result';
+type HiddenSide = 'top' | 'bottom' | 'left' | 'right' | null;
+
+const HIDDEN_SIDES: Exclude<HiddenSide, null>[] = ['top', 'bottom', 'left', 'right'];
+const NORMAL_CHOICE_COUNT = 4;
+const HARD_CHOICE_COUNT = 6;
 
 interface QuizState {
   currentQuestion: number;
@@ -24,6 +29,9 @@ interface QuizState {
   selectedAnswer: string | null;
   usedCodes: string[];
   answers: AttemptQuestion[];
+  hardMode: boolean;
+  rotation: number;
+  hiddenSide: HiddenSide;
 }
 
 function shuffleArray<T>(array: T[]): T[] {
@@ -35,27 +43,48 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-function generateChoices(correct: PrefectureData, all: PrefectureData[]): string[] {
+function generateChoices(
+  correct: PrefectureData,
+  all: PrefectureData[],
+  count: number,
+): string[] {
   const wrong: string[] = [];
   const others = shuffleArray(all.filter((p) => p.code !== correct.code));
   for (const p of others) {
-    if (wrong.length >= 3) break;
+    if (wrong.length >= count - 1) break;
     wrong.push(p.name);
   }
   return shuffleArray([correct.name, ...wrong]);
 }
 
-function makePlayingState(): QuizState {
+// ハードモードの出題演出（傾き＋50%マスクの面）をランダム生成する。
+function makeQuestionEffects(hardMode: boolean): { rotation: number; hiddenSide: HiddenSide } {
+  if (!hardMode) return { rotation: 0, hiddenSide: null };
+  const magnitude = 20 + Math.floor(Math.random() * 41); // 20〜60度
+  const rotation = Math.random() < 0.5 ? -magnitude : magnitude;
+  const hiddenSide = HIDDEN_SIDES[Math.floor(Math.random() * HIDDEN_SIDES.length)];
+  return { rotation, hiddenSide };
+}
+
+function makePlayingState(hardMode: boolean): QuizState {
   const randomPref = PREFECTURES[Math.floor(Math.random() * PREFECTURES.length)];
+  const effects = makeQuestionEffects(hardMode);
   return {
     currentQuestion: 1,
     score: 0,
     currentPrefecture: randomPref,
-    choices: generateChoices(randomPref, PREFECTURES),
+    choices: generateChoices(
+      randomPref,
+      PREFECTURES,
+      hardMode ? HARD_CHOICE_COUNT : NORMAL_CHOICE_COUNT,
+    ),
     phase: 'playing',
     selectedAnswer: null,
     usedCodes: [randomPref.code],
     answers: [],
+    hardMode,
+    rotation: effects.rotation,
+    hiddenSide: effects.hiddenSide,
   };
 }
 
@@ -68,6 +97,9 @@ const READY_STATE: QuizState = {
   selectedAnswer: null,
   usedCodes: [],
   answers: [],
+  hardMode: false,
+  rotation: 0,
+  hiddenSide: null,
 };
 
 export default function JapanShapeQuizPage() {
@@ -98,15 +130,18 @@ function JapanShapeQuizInner() {
   const [totalQuestions, setTotalQuestions] = useState(
     Number.isFinite(qFromUrl) && qFromUrl > 0 ? qFromUrl : 10,
   );
+  const [hardMode, setHardMode] = useState(
+    Number(searchParams?.get('mode')) === 1,
+  );
   const [timerKey, setTimerKey] = useState(0);
   const savedAttemptRef = useRef<string | null>(null);
   const urlPlayConsumedRef = useRef(false);
 
   const startGame = useCallback(() => {
     savedAttemptRef.current = null;
-    setState(makePlayingState());
+    setState(makePlayingState(hardMode));
     setTimerKey((p) => p + 1);
-  }, []);
+  }, [hardMode]);
 
   const handleAnswer = useCallback(
     (answer: string, isCorrect: boolean) => {
@@ -136,14 +171,21 @@ function JapanShapeQuizInner() {
       const available = PREFECTURES.filter((p) => !prev.usedCodes.includes(p.code));
       if (available.length === 0) return { ...prev, phase: 'result' };
       const randomPref = available[Math.floor(Math.random() * available.length)];
+      const effects = makeQuestionEffects(prev.hardMode);
       return {
         ...prev,
         currentQuestion: next,
         currentPrefecture: randomPref,
-        choices: generateChoices(randomPref, PREFECTURES),
+        choices: generateChoices(
+          randomPref,
+          PREFECTURES,
+          prev.hardMode ? HARD_CHOICE_COUNT : NORMAL_CHOICE_COUNT,
+        ),
         phase: 'playing',
         selectedAnswer: null,
         usedCodes: [...prev.usedCodes, randomPref.code],
+        rotation: effects.rotation,
+        hiddenSide: effects.hiddenSide,
       };
     });
     setTimerKey((p) => p + 1);
@@ -158,9 +200,9 @@ function JapanShapeQuizInner() {
     if (!playFromUrl) return;
     if (urlPlayConsumedRef.current) return;
     urlPlayConsumedRef.current = true;
-    setState(makePlayingState());
+    setState(makePlayingState(Number(searchParams?.get('mode')) === 1));
     setTimerKey((k) => k + 1);
-  }, [playFromUrl]);
+  }, [playFromUrl, searchParams]);
 
   useEffect(() => {
     if (state.phase !== 'result') return;
@@ -217,6 +259,17 @@ function JapanShapeQuizInner() {
             <span className="qstart__emoji">🧩</span>
             <h1 className="qstart__title">けんのかたち クイズ</h1>
             <p className="qstart__desc">かたちだけで どこの けんか あてよう！</p>
+
+            <QuizStartOptions
+              label="むずかしさ"
+              name="mode"
+              value={hardMode ? 1 : 0}
+              onChange={(v) => setHardMode(v === 1)}
+              options={[
+                { value: 0, label: 'ふつう\n(4たく)' },
+                { value: 1, label: 'ハード\n(6たく・かくれる)' },
+              ]}
+            />
 
             <QuizStartOptions
               label="もんだいすう"
@@ -287,9 +340,16 @@ function JapanShapeQuizInner() {
               onTimeUp={handleTimeUp}
             />
           </div>
-          <p className="quiz-question__text">この かたちは どこの けん？</p>
+          <p className="quiz-question__text">
+            この かたちは どこの けん？
+            {state.hardMode && <span className="quiz-question__badge"> 🔥ハード</span>}
+          </p>
           <div className="quiz-map quiz-map--shape">
-            <JapanMapShape code={state.currentPrefecture?.code ?? null} />
+            <JapanMapShape
+              code={state.currentPrefecture?.code ?? null}
+              rotation={state.rotation}
+              hiddenSide={state.hiddenSide}
+            />
           </div>
         </section>
 
